@@ -41,9 +41,7 @@ def createApp() -> Flask:
     supportTypeService = SupportTypeService(apiClient)
     filmService = FilmService(
         apiClient,
-        directorService,
         genreService,
-        languageService,
         classificationService,
         actorService,
         supportService,

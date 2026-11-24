@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 
 from exceptions import USER_INPUT_ERRORS
 from services import DirectorService
@@ -17,6 +17,19 @@ _FIELDS = [
 
 def createDirectorBlueprint(directorService: DirectorService) -> Blueprint:
     blueprint = Blueprint("directors", __name__, url_prefix="/directors")
+
+    @blueprint.get("/search")
+    def searchDirectors():
+        query = (request.args.get("q") or "").strip()
+        if not query:
+            return jsonify([])
+        return jsonify([
+            {
+                "id": director.idDirector,
+                "label": f"{director.firstName} {director.lastName}",
+            }
+            for director in directorService.searchDirectorsByName(query)
+        ])
 
     @blueprint.get("")
     def getDirectors():

@@ -9,15 +9,14 @@ from exceptions import (
     ApiError,
     InvalidReferenceError,
     InvalidRequestError,
+    NotFoundError,
 )
-from models import ActorDTO, FilmDTO, SupportDTO
+from models import ActorDTO, DirectorDTO, FilmDTO, LanguageDTO, SupportDTO
 
 from .ApiClient import ApiClient
 from .ClassificationService import ClassificationService
-from .DirectorService import DirectorService
 from .FormParser import FormParser
 from .GenreService import GenreService
-from .LanguageService import LanguageService
 from .ActorService import ActorService
 from .SupportService import SupportService
 from .SupportTypeService import SupportTypeService
@@ -27,18 +26,14 @@ class FilmService:
     def __init__(
         self,
         apiClient: ApiClient,
-        directorService: DirectorService,
         genreService: GenreService,
-        languageService: LanguageService,
         classificationService: ClassificationService,
         actorService: ActorService,
         supportService: SupportService,
         supportTypeService: SupportTypeService,
     ) -> None:
         self._apiClient = apiClient
-        self._directorService = directorService
         self._genreService = genreService
-        self._languageService = languageService
         self._classificationService = classificationService
         self._actorService = actorService
         self._supportService = supportService
@@ -146,13 +141,26 @@ class FilmService:
         if duration <= 0:
             raise InvalidRequestError("La durée doit être supérieure à 0.")
 
-        directors = {d.idDirector: d for d in self._directorService.getAllDirectors()}
         classifications = {
             c.idClassification: c for c in self._classificationService.getAllClassifications()
         }
-        languages = {l.idLanguage: l for l in self._languageService.getAllLanguages()}
         genres = {g.idGenre: g for g in self._genreService.getAllGenres()}
-        actors = {a.idActor: a for a in self._actorService.getAllActors()}
+        directorId = FormParser.optionalInteger(form, "idDirector", "Réalisateur")
+        nativeLanguageId = FormParser.optionalInteger(
+            form, "idNativeLanguage", "Langue d'origine"
+        )
+        languageIds = FormParser.integerList(
+            form, "idLanguages", "Langues disponibles"
+        )
+        actorIds = FormParser.integerList(form, "idActors", "Acteurs")
+
+        for idActor in actorIds:
+            try:
+                self._actorService.getActorById(idActor)
+            except NotFoundError as error:
+                raise InvalidReferenceError(
+                    f"Acteur {idActor} : élément inexistant."
+                ) from error
 
         return FilmDTO(
             idFilm=idFilm or "",
@@ -162,30 +170,36 @@ class FilmService:
             duration=duration,
             posterUrl=FormParser.text(form, "posterUrl", "URL de l'affiche"),
             addedDate=addedDate,
-            director=self._pickOne(
-                directors, FormParser.optionalInteger(form, "idDirector", "Réalisateur"), "Réalisateur"
+            director=(
+                DirectorDTO(
+                    idDirector=directorId,
+                    lastName="",
+                    firstName="",
+                )
+                if directorId is not None
+                else None
             ),
             classification=self._pickOne(
                 classifications,
                 FormParser.optionalInteger(form, "idClassification", "Classification"),
                 "Classification",
             ),
-            nativeLanguage=self._pickOne(
-                languages,
-                FormParser.optionalInteger(form, "idNativeLanguage", "Langue d'origine"),
-                "Langue",
+            nativeLanguage=(
+                LanguageDTO(idLanguage=nativeLanguageId, code="", name="")
+                if nativeLanguageId is not None
+                else None
             ),
-            languages=self._pickMany(
-                languages, FormParser.integerList(form, "idLanguages", "Langues disponibles"), "Langue"
-            ),
+            languages=[
+                LanguageDTO(idLanguage=idLanguage, code="", name="")
+                for idLanguage in languageIds
+            ],
             genre=self._pickMany(
                 genres, FormParser.integerList(form, "idGenres", "Genres"), "Genre"
             ),
-            actors=self._pickMany(
-                actors,
-                FormParser.integerList(form, "idActors", "Acteurs"),
-                "Acteur",
-            ),
+            actors=[
+                ActorDTO(idActor=idActor, firstName="", lastName="")
+                for idActor in actorIds
+            ],
         )
 
     def _buildSupports(
@@ -313,6 +327,20 @@ class FilmService:
     def _filmPayload(film: FilmDTO, includeId: bool) -> Dict[str, Any]:
         payload = film.toDict()
         payload.pop("supports", None)
+        payload["director"] = (
+            {"idDirector": film.director.idDirector} if film.director else None
+        )
+        payload["nativeLanguage"] = (
+            {"idLanguage": film.nativeLanguage.idLanguage}
+            if film.nativeLanguage
+            else None
+        )
+        payload["languages"] = [
+            {"idLanguage": language.idLanguage} for language in film.languages
+        ]
+        payload["actors"] = [
+            {"idActor": actor.idActor} for actor in film.actors
+        ]
         if not includeId:
             payload.pop("idFilm", None)
         return payload

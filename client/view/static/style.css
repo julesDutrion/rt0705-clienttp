@@ -200,6 +200,47 @@ fieldset {
 fieldset legend { padding: 0 7px; font-weight: 800; }
 fieldset label { display: inline-flex; gap: 8px; margin: 5px 18px 8px 0; font-weight: 600; }
 fieldset input[type="checkbox"] { width: 18px; min-height: 18px; accent-color: var(--violet); }
+.entity-selector { display: grid; gap: 12px; }
+.entity-selector label { display: grid; gap: 8px; margin: 0; }
+.selected-entities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.selected-entity {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #f6f4ff;
+}
+.selected-entity-remove {
+  border: 0;
+  padding: 0;
+  color: var(--danger);
+  background: transparent;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.entity-results { display: grid; gap: 6px; }
+.entity-result {
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  background: white;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.entity-result:hover, .entity-result:focus { border-color: var(--violet); background: #f6f4ff; }
+.entity-results p { margin: 0; color: var(--muted); font-size: .9rem; }
 .support-fieldset { display: grid; gap: 14px; }
 .support-row {
   display: grid;

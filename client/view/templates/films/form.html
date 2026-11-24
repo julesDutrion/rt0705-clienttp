@@ -14,15 +14,29 @@
   <p><label>Durée (minutes) <input type="number" min="1" name="duration" value="{{ film.duration|default('') }}" required></label></p>
   <p><label>URL de l'affiche <input name="posterUrl" value="{{ film.posterUrl|default('') }}"></label></p>
 
-  <p><label>Réalisateur
-    <select name="idDirector">
-      <option value="">Aucun</option>
-      {% set selectedDirector = film.director.idDirector if film and film.director else '' %}
-      {% for director in directors %}
-        <option value="{{ director.idDirector }}" {% if selectedDirector|string == director.idDirector|string %}selected{% endif %}>{{ director.firstName }} {{ director.lastName }}</option>
-      {% endfor %}
-    </select>
-  </label></p>
+  {% set selectedDirector = film.director.idDirector if film and film.director else '' %}
+  {% set selectedDirectorLabel = '' %}
+  {% if film and film.director %}
+    {% if film.director.displayName is defined %}
+      {% set selectedDirectorLabel = film.director.displayName %}
+    {% else %}
+      {% set selectedDirectorLabel = (film.director.firstName ~ ' ' ~ film.director.lastName)|trim %}
+    {% endif %}
+  {% endif %}
+  <fieldset class="entity-selector" data-entity-selector data-selection-mode="single" data-input-name="idDirector" data-search-url="{{ url_for('directors.searchDirectors') }}" data-min-query-length="2">
+    <legend>Réalisateur</legend>
+    <label>Rechercher un réalisateur
+      <input type="search" data-entity-search placeholder="Nom ou prénom" autocomplete="off">
+    </label>
+    <ul class="selected-entities" data-selected-items aria-live="polite"></ul>
+    <div class="entity-results" data-search-results role="listbox" aria-label="Résultats des réalisateurs"></div>
+    <div data-selected-inputs data-label-input-name="idDirectorLabels">
+      {% if selectedDirector %}
+        <input type="hidden" name="idDirector" value="{{ selectedDirector }}" data-selected-input data-label="{{ selectedDirectorLabel }}">
+        <input type="hidden" name="idDirectorLabels" value="{{ selectedDirectorLabel }}" data-selected-label-input>
+      {% endif %}
+    </div>
+  </fieldset>
 
   <p><label>Classification
     <select name="idClassification">
@@ -34,22 +48,48 @@
     </select>
   </label></p>
 
-  <p><label>Langue d'origine
-    <select name="idNativeLanguage">
-      <option value="">Aucune</option>
-      {% set selectedNative = film.nativeLanguage.idLanguage if film and film.nativeLanguage else '' %}
-      {% for language in languages %}
-        <option value="{{ language.idLanguage }}" {% if selectedNative|string == language.idLanguage|string %}selected{% endif %}>{{ language.name }}</option>
-      {% endfor %}
-    </select>
-  </label></p>
+  {% set selectedNative = film.nativeLanguage.idLanguage if film and film.nativeLanguage else '' %}
+  {% set selectedNativeLabel = '' %}
+  {% if film and film.nativeLanguage %}
+    {% if film.nativeLanguage.displayName is defined %}
+      {% set selectedNativeLabel = film.nativeLanguage.displayName %}
+    {% else %}
+      {% set selectedNativeLabel = film.nativeLanguage.name ~ ' (' ~ film.nativeLanguage.code ~ ')' %}
+    {% endif %}
+  {% endif %}
+  <fieldset class="entity-selector" data-entity-selector data-selection-mode="single" data-input-name="idNativeLanguage" data-search-url="{{ url_for('languages.searchLanguagesByCode') }}" data-min-query-length="1">
+    <legend>Langue d'origine</legend>
+    <label>Rechercher une langue
+      <input type="search" data-entity-search placeholder="Code exact (ex. fr)" autocomplete="off">
+    </label>
+    <ul class="selected-entities" data-selected-items aria-live="polite"></ul>
+    <div class="entity-results" data-search-results role="listbox" aria-label="Résultats des langues d'origine"></div>
+    <div data-selected-inputs data-label-input-name="idNativeLanguageLabels">
+      {% if selectedNative %}
+        <input type="hidden" name="idNativeLanguage" value="{{ selectedNative }}" data-selected-input data-label="{{ selectedNativeLabel }}">
+        <input type="hidden" name="idNativeLanguageLabels" value="{{ selectedNativeLabel }}" data-selected-label-input>
+      {% endif %}
+    </div>
+  </fieldset>
 
-  <fieldset>
+  <fieldset class="entity-selector" data-entity-selector data-selection-mode="multiple" data-input-name="idLanguages" data-search-url="{{ url_for('languages.searchLanguagesByCode') }}" data-min-query-length="1">
     <legend>Langues disponibles</legend>
-    {% set selectedLanguages = film.languages|map(attribute='idLanguage')|map('string')|list if film else [] %}
-    {% for language in languages %}
-      <label><input type="checkbox" name="idLanguages" value="{{ language.idLanguage }}" {% if language.idLanguage|string in selectedLanguages %}checked{% endif %}> {{ language.name }}</label>
-    {% endfor %}
+    <label>Rechercher une langue
+      <input type="search" data-entity-search placeholder="Code exact (ex. fr)" autocomplete="off">
+    </label>
+    <ul class="selected-entities" data-selected-items aria-live="polite"></ul>
+    <div class="entity-results" data-search-results role="listbox" aria-label="Résultats des langues disponibles"></div>
+    <div data-selected-inputs data-label-input-name="idLanguagesLabels">
+      {% for language in film.languages|default([], true) %}
+        {% if language.displayName is defined %}
+          {% set selectedLanguageLabel = language.displayName %}
+        {% else %}
+          {% set selectedLanguageLabel = language.name ~ ' (' ~ language.code ~ ')' %}
+        {% endif %}
+        <input type="hidden" name="idLanguages" value="{{ language.idLanguage }}" data-selected-input data-label="{{ selectedLanguageLabel }}">
+        <input type="hidden" name="idLanguagesLabels" value="{{ selectedLanguageLabel }}" data-selected-label-input>
+      {% endfor %}
+    </div>
   </fieldset>
 
   <fieldset>
@@ -60,12 +100,24 @@
     {% endfor %}
   </fieldset>
 
-  <fieldset>
+  <fieldset class="entity-selector" data-entity-selector data-selection-mode="multiple" data-input-name="idActors" data-search-url="{{ url_for('actors.searchActors') }}" data-min-query-length="2">
     <legend>Acteurs</legend>
-    {% set selectedActors = film.actors|map(attribute='idActor')|map('string')|list if film else [] %}
-    {% for actor in actors %}
-      <label><input type="checkbox" name="idActors" value="{{ actor.idActor }}" {% if actor.idActor|string in selectedActors %}checked{% endif %}> {{ actor.firstName }} {{ actor.lastName }}</label>
-    {% endfor %}
+    <label>Rechercher un acteur
+      <input type="search" data-entity-search placeholder="Nom ou prénom" autocomplete="off">
+    </label>
+    <ul class="selected-entities" data-selected-items aria-live="polite"></ul>
+    <div class="entity-results" data-search-results role="listbox" aria-label="Résultats des acteurs"></div>
+    <div data-selected-inputs data-label-input-name="idActorsLabels">
+      {% for actor in film.actors|default([], true) %}
+        {% if actor.displayName is defined %}
+          {% set selectedActorLabel = actor.displayName %}
+        {% else %}
+          {% set selectedActorLabel = (actor.firstName ~ ' ' ~ actor.lastName)|trim %}
+        {% endif %}
+        <input type="hidden" name="idActors" value="{{ actor.idActor }}" data-selected-input data-label="{{ selectedActorLabel }}">
+        <input type="hidden" name="idActorsLabels" value="{{ selectedActorLabel }}" data-selected-label-input>
+      {% endfor %}
+    </div>
   </fieldset>
 
   <fieldset class="support-fieldset">
@@ -123,41 +175,5 @@
   </div>
 </template>
 
-<script>
-  const supportRows = document.getElementById("support-rows");
-  const supportTemplate = document.getElementById("support-row-template");
-
-  function updateSupportFields(row) {
-    const typeSelect = row.querySelector("[data-support-type]");
-    const mode = typeSelect.selectedOptions[0]?.dataset.mode;
-    const physicalField = row.querySelector("[data-physical-field]");
-    const digitalField = row.querySelector("[data-digital-field]");
-    const locationInput = physicalField.querySelector("input");
-    const urlInput = digitalField.querySelector("input");
-
-    physicalField.hidden = mode !== "physical";
-    digitalField.hidden = mode !== "digital";
-    locationInput.required = mode === "physical";
-    urlInput.required = mode === "digital";
-    if (mode === "physical") urlInput.value = "";
-    if (mode === "digital") locationInput.value = "";
-  }
-
-  supportRows.querySelectorAll("[data-support-row]").forEach((row) => {
-    updateSupportFields(row);
-    row.querySelector("[data-support-type]").addEventListener("change", () => updateSupportFields(row));
-  });
-
-  document.getElementById("add-support").addEventListener("click", () => {
-    const row = supportTemplate.content.firstElementChild.cloneNode(true);
-    supportRows.appendChild(row);
-    row.querySelector("[data-support-type]").addEventListener("change", () => updateSupportFields(row));
-    row.querySelector("[data-remove-support]").addEventListener("click", () => row.remove());
-    updateSupportFields(row);
-  });
-
-  supportRows.querySelectorAll("[data-remove-support]").forEach((button) => {
-    button.addEventListener("click", () => button.closest("[data-support-row]").remove());
-  });
-</script>
+<script src="{{ url_for('static', filename='film-form.js') }}" defer></script>
 {% endblock %}

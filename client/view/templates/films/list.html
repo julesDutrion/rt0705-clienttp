@@ -21,30 +21,45 @@
       {% endfor %}
     </select>
   </label>
-  <label>Réalisateur
-    <select name="director">
-      <option value="">Tous</option>
-      {% for director in directors %}
-        <option value="{{ director.idDirector }}" {% if filters.director|string == director.idDirector|string %}selected{% endif %}>{{ director.firstName }} {{ director.lastName }}</option>
-      {% endfor %}
-    </select>
-  </label>
-  <label>Acteur
-    <select name="actor">
-      <option value="">Tous</option>
-      {% for actor in actors %}
-        <option value="{{ actor.idActor }}" {% if filters.actor|string == actor.idActor|string %}selected{% endif %}>{{ actor.firstName }} {{ actor.lastName }}</option>
-      {% endfor %}
-    </select>
-  </label>
-  <label>Langue
-    <select name="language">
-      <option value="">Toutes</option>
-      {% for language in languages %}
-        <option value="{{ language.idLanguage }}" {% if filters.language|string == language.idLanguage|string %}selected{% endif %}>{{ language.name }}</option>
-      {% endfor %}
-    </select>
-  </label>
+  <fieldset class="entity-selector" data-entity-selector data-selection-mode="single" data-input-name="director" data-search-url="{{ url_for('directors.searchDirectors') }}" data-min-query-length="2">
+    <legend>Réalisateur</legend>
+    <label>Rechercher
+      <input type="search" data-entity-search placeholder="Nom ou prénom" autocomplete="off">
+    </label>
+    <ul class="selected-entities" data-selected-items aria-live="polite"></ul>
+    <div class="entity-results" data-search-results role="listbox" aria-label="Résultats des réalisateurs"></div>
+    <div data-selected-inputs>
+      {% if selectedDirector %}
+        <input type="hidden" name="director" value="{{ selectedDirector.idDirector }}" data-selected-input data-label="{{ selectedDirector.firstName }} {{ selectedDirector.lastName }}">
+      {% endif %}
+    </div>
+  </fieldset>
+  <fieldset class="entity-selector" data-entity-selector data-selection-mode="single" data-input-name="actor" data-search-url="{{ url_for('actors.searchActors') }}" data-min-query-length="2">
+    <legend>Acteur</legend>
+    <label>Rechercher
+      <input type="search" data-entity-search placeholder="Nom ou prénom" autocomplete="off">
+    </label>
+    <ul class="selected-entities" data-selected-items aria-live="polite"></ul>
+    <div class="entity-results" data-search-results role="listbox" aria-label="Résultats des acteurs"></div>
+    <div data-selected-inputs>
+      {% if selectedActor %}
+        <input type="hidden" name="actor" value="{{ selectedActor.idActor }}" data-selected-input data-label="{{ selectedActor.firstName }} {{ selectedActor.lastName }}">
+      {% endif %}
+    </div>
+  </fieldset>
+  <fieldset class="entity-selector" data-entity-selector data-selection-mode="single" data-input-name="language" data-search-url="{{ url_for('languages.searchLanguagesByCode') }}" data-min-query-length="1">
+    <legend>Langue</legend>
+    <label>Rechercher par code
+      <input type="search" data-entity-search placeholder="Code exact (ex. fr)" autocomplete="off">
+    </label>
+    <ul class="selected-entities" data-selected-items aria-live="polite"></ul>
+    <div class="entity-results" data-search-results role="listbox" aria-label="Résultats des langues"></div>
+    <div data-selected-inputs>
+      {% if selectedLanguage %}
+        <input type="hidden" name="language" value="{{ selectedLanguage.idLanguage }}" data-selected-input data-label="{{ selectedLanguage.name }} ({{ selectedLanguage.code }})">
+      {% endif %}
+    </div>
+  </fieldset>
   <label>Type de support
     <select name="supportType">
       <option value="">Tous</option>
@@ -55,6 +70,8 @@
   </label>
   <button class="button primary" type="submit">Rechercher</button>
 </form>
+
+<script src="{{ url_for('static', filename='film-form.js') }}" defer></script>
 
 {% for film in films %}
   <article>

@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from werkzeug.datastructures import MultiDict
@@ -18,9 +18,31 @@ from services import (
 def _formToPrefill(form: MultiDict, idFilm: Optional[str] = None) -> Dict[str, Any]:
     """Reconstruit de quoi préremplir films/form.html après une saisie invalide."""
 
-    def reference(key: str, nestedKey: str) -> Optional[Dict[str, Any]]:
+    def reference(
+        key: str, nestedKey: str, labelKey: Optional[str] = None
+    ) -> Optional[Dict[str, Any]]:
         value = form.get(key)
-        return {nestedKey: value} if value else None
+        if not value:
+            return None
+        item = {nestedKey: value}
+        if labelKey:
+            item["displayName"] = form.get(labelKey, "")
+        return item
+
+    def selectedItems(
+        key: str, labelKey: str, idKey: str
+    ) -> List[Dict[str, Any]]:
+        identifiers = form.getlist(key)
+        labels = form.getlist(labelKey)
+        count = max(len(identifiers), len(labels))
+        return [
+            {
+                idKey: identifiers[index] if index < len(identifiers) else "",
+                "displayName": labels[index] if index < len(labels) else "",
+            }
+            for index in range(count)
+            if index < len(identifiers) and identifiers[index]
+        ]
 
     supportFields = [
         form.getlist("supportIds"),
@@ -37,12 +59,16 @@ def _formToPrefill(form: MultiDict, idFilm: Optional[str] = None) -> Dict[str, A
         "duration": form.get("duration", ""),
         "posterUrl": form.get("posterUrl", ""),
         "addedDate": form.get("addedDate", ""),
-        "director": reference("idDirector", "idDirector"),
+        "director": reference("idDirector", "idDirector", "idDirectorLabels"),
         "classification": reference("idClassification", "idClassification"),
-        "nativeLanguage": reference("idNativeLanguage", "idLanguage"),
-        "languages": [{"idLanguage": value} for value in form.getlist("idLanguages")],
+        "nativeLanguage": reference(
+            "idNativeLanguage", "idLanguage", "idNativeLanguageLabels"
+        ),
+        "languages": selectedItems(
+            "idLanguages", "idLanguagesLabels", "idLanguage"
+        ),
         "genre": [{"idGenre": value} for value in form.getlist("idGenres")],
-        "actors": [{"idActor": value} for value in form.getlist("idActors")],
+        "actors": selectedItems("idActors", "idActorsLabels", "idActor"),
         "supports": [
             {
                 "idSupport": idSupport or None,
@@ -71,11 +97,8 @@ def createFilmBlueprint(
 
     def formLists() -> Dict[str, Any]:
         return {
-            "directors": directorService.getAllDirectors(),
             "classifications": classificationService.getAllClassifications(),
-            "languages": languageService.getAllLanguages(),
             "genres": genreService.getAllGenres(),
-            "actors": actorService.getAllActors(),
             "supportTypes": supportTypeService.getAllSupportTypes(),
         }
 
@@ -90,13 +113,26 @@ def createFilmBlueprint(
         films = filmService.searchFilms(
             title, idGenre, idDirector, idLanguage, idActor, idSupportType
         )
+        selectedDirector = (
+            directorService.getDirectorById(idDirector)
+            if idDirector is not None
+            else None
+        )
+        selectedLanguage = (
+            languageService.getLanguageById(idLanguage)
+            if idLanguage is not None
+            else None
+        )
+        selectedActor = (
+            actorService.getActorById(idActor) if idActor is not None else None
+        )
         return render_template(
             "films/list.html",
             films=films,
             genres=genreService.getAllGenres(),
-            directors=directorService.getAllDirectors(),
-            languages=languageService.getAllLanguages(),
-            actors=actorService.getAllActors(),
+            selectedDirector=selectedDirector,
+            selectedLanguage=selectedLanguage,
+            selectedActor=selectedActor,
             supportTypes=supportTypeService.getAllSupportTypes(),
             filters={
                 "title": title,

@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 
 from exceptions import USER_INPUT_ERRORS
 from services import ActorService
@@ -17,6 +17,19 @@ _FIELDS = [
 
 def createActorBlueprint(actorService: ActorService) -> Blueprint:
     blueprint = Blueprint("actors", __name__, url_prefix="/actors")
+
+    @blueprint.get("/search")
+    def searchActors():
+        query = (request.args.get("q") or "").strip()
+        if not query:
+            return jsonify([])
+        return jsonify([
+            {
+                "id": actor.idActor,
+                "label": f"{actor.firstName} {actor.lastName}",
+            }
+            for actor in actorService.searchActorsByName(query)
+        ])
 
     @blueprint.get("")
     def getActors():
