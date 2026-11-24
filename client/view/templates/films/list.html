@@ -1,0 +1,64 @@
+{% extends "components/base.html" %}
+{% block title %}Films{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Collection</p>
+    <h1>Films</h1>
+  </div>
+  <a class="button primary" href="{{ url_for('films.newFilm') }}">+ Ajouter un film</a>
+</div>
+
+<form class="filter-card" method="get" action="{{ url_for('films.getFilms') }}">
+  <label>Titre
+    <input type="search" name="title" value="{{ filters.title or '' }}">
+  </label>
+  <label>Genre
+    <select name="genre">
+      <option value="">Tous</option>
+      {% for genre in genres %}
+        <option value="{{ genre.idGenre }}" {% if filters.genre|string == genre.idGenre|string %}selected{% endif %}>{{ genre.nameGenre }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Réalisateur
+    <select name="director">
+      <option value="">Tous</option>
+      {% for director in directors %}
+        <option value="{{ director.idDirector }}" {% if filters.director|string == director.idDirector|string %}selected{% endif %}>{{ director.firstName }} {{ director.lastName }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Acteur
+    <select name="actor">
+      <option value="">Tous</option>
+      {% for actor in actors %}
+        <option value="{{ actor.idActor }}" {% if filters.actor|string == actor.idActor|string %}selected{% endif %}>{{ actor.firstName }} {{ actor.lastName }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Langue
+    <select name="language">
+      <option value="">Toutes</option>
+      {% for language in languages %}
+        <option value="{{ language.idLanguage }}" {% if filters.language|string == language.idLanguage|string %}selected{% endif %}>{{ language.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button class="button primary" type="submit">Rechercher</button>
+</form>
+
+{% for film in films %}
+  <article>
+    <h2><a href="{{ url_for('films.getFilm', idFilm=film.idFilm) }}">{{ film.title }}</a></h2>
+    <p>{{ film.releaseDate }}{% if film.duration %} · {{ film.duration }} min{% endif %}</p>
+    {% if film.director %}<p>Réalisateur : {{ film.director.firstName }} {{ film.director.lastName }}</p>{% endif %}
+    <p>
+      <a href="{{ url_for('films.getFilm', idFilm=film.idFilm) }}">Détails</a>
+      <a href="{{ url_for('films.editFilm', idFilm=film.idFilm) }}">Modifier</a>
+    </p>
+  </article>
+{% else %}
+  <p>Aucun film trouvé.</p>
+{% endfor %}
+{% endblock %}

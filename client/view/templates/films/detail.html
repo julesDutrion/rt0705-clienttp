@@ -1,0 +1,50 @@
+{% extends "components/base.html" %}
+{% block title %}{{ film.title }}{% endblock %}
+{% block content %}
+<p><a class="back-link" href="{{ url_for('films.getFilms') }}">← Retour au catalogue</a></p>
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Fiche film</p>
+    <h1>{{ film.title }}</h1>
+  </div>
+  <a class="button primary" href="{{ url_for('films.editFilm', idFilm=film.idFilm) }}">Modifier</a>
+</div>
+<p>{{ film.releaseDate }} · {{ film.duration }} min</p>
+
+<h2>Synopsis</h2>
+<p>{{ film.synopsis or "Aucun synopsis disponible." }}</p>
+
+<dl>
+  {% if film.director %}
+    <dt>Réalisateur</dt><dd>{{ film.director.firstName }} {{ film.director.lastName }}</dd>
+  {% endif %}
+  {% if film.classification %}
+    <dt>Classification</dt><dd>{{ film.classification.minAge }}+</dd>
+  {% endif %}
+  {% if film.nativeLanguage %}
+    <dt>Langue d'origine</dt><dd>{{ film.nativeLanguage.name }}</dd>
+  {% endif %}
+  {% if film.languages %}
+    <dt>Langues disponibles</dt>
+    <dd>{% for language in film.languages %}{{ language.name }}{% if not loop.last %}, {% endif %}{% endfor %}</dd>
+  {% endif %}
+  {% if film.genre %}
+    <dt>Genres</dt>
+    <dd>{% for genre in film.genre %}{{ genre.nameGenre }}{% if not loop.last %}, {% endif %}{% endfor %}</dd>
+  {% endif %}
+  <dt>Ajouté le</dt><dd>{{ film.addedDate }}</dd>
+</dl>
+
+{% if film.actors %}
+<h2>Distribution</h2>
+<ul>
+  {% for actor in film.actors %}
+    <li><a href="{{ url_for('films.getFilms', actor=actor.idActor) }}">{{ actor.firstName }} {{ actor.lastName }}</a></li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<form method="post" action="{{ url_for('films.deleteFilm', idFilm=film.idFilm) }}">
+  <button type="submit">Supprimer le film</button>
+</form>
+{% endblock %}

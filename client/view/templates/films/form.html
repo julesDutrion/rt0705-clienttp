@@ -1,0 +1,76 @@
+{% extends "components/base.html" %}
+{% block title %}{{ 'Modifier le film' if isEdit else 'Ajouter un film' }}{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">{{ 'Modification' if isEdit else 'Nouvelle création' }}</p>
+    <h1>{{ 'Modifier le film' if isEdit else 'Ajouter un film' }}</h1>
+  </div>
+</div>
+<form class="form-card" method="post">
+  <p><label>Titre <input name="title" value="{{ film.title|default('') }}" required></label></p>
+  <p><label>Synopsis <textarea name="synopsis">{{ film.synopsis|default('') }}</textarea></label></p>
+  <p><label>Date de sortie <input type="date" name="releaseDate" value="{{ film.releaseDate|default('') }}" required></label></p>
+  <p><label>Durée (minutes) <input type="number" min="1" name="duration" value="{{ film.duration|default('') }}" required></label></p>
+  <p><label>URL de l'affiche <input name="posterUrl" value="{{ film.posterUrl|default('') }}"></label></p>
+
+  <p><label>Réalisateur
+    <select name="idDirector">
+      <option value="">Aucun</option>
+      {% set selectedDirector = film.director.idDirector if film and film.director else '' %}
+      {% for director in directors %}
+        <option value="{{ director.idDirector }}" {% if selectedDirector|string == director.idDirector|string %}selected{% endif %}>{{ director.firstName }} {{ director.lastName }}</option>
+      {% endfor %}
+    </select>
+  </label></p>
+
+  <p><label>Classification
+    <select name="idClassification">
+      <option value="">Aucune</option>
+      {% set selectedClassification = film.classification.idClassification if film and film.classification else '' %}
+      {% for classification in classifications %}
+        <option value="{{ classification.idClassification }}" {% if selectedClassification|string == classification.idClassification|string %}selected{% endif %}>{{ classification.minAge }}+</option>
+      {% endfor %}
+    </select>
+  </label></p>
+
+  <p><label>Langue d'origine
+    <select name="idNativeLanguage">
+      <option value="">Aucune</option>
+      {% set selectedNative = film.nativeLanguage.idLanguage if film and film.nativeLanguage else '' %}
+      {% for language in languages %}
+        <option value="{{ language.idLanguage }}" {% if selectedNative|string == language.idLanguage|string %}selected{% endif %}>{{ language.name }}</option>
+      {% endfor %}
+    </select>
+  </label></p>
+
+  <fieldset>
+    <legend>Langues disponibles</legend>
+    {% set selectedLanguages = film.languages|map(attribute='idLanguage')|map('string')|list if film else [] %}
+    {% for language in languages %}
+      <label><input type="checkbox" name="idLanguages" value="{{ language.idLanguage }}" {% if language.idLanguage|string in selectedLanguages %}checked{% endif %}> {{ language.name }}</label>
+    {% endfor %}
+  </fieldset>
+
+  <fieldset>
+    <legend>Genres</legend>
+    {% set selectedGenres = film.genre|map(attribute='idGenre')|map('string')|list if film else [] %}
+    {% for genre in genres %}
+      <label><input type="checkbox" name="idGenres" value="{{ genre.idGenre }}" {% if genre.idGenre|string in selectedGenres %}checked{% endif %}> {{ genre.nameGenre }}</label>
+    {% endfor %}
+  </fieldset>
+
+  <fieldset>
+    <legend>Acteurs</legend>
+    {% set selectedActors = film.actors|map(attribute='idActor')|map('string')|list if film else [] %}
+    {% for actor in actors %}
+      <label><input type="checkbox" name="idActors" value="{{ actor.idActor }}" {% if actor.idActor|string in selectedActors %}checked{% endif %}> {{ actor.firstName }} {{ actor.lastName }}</label>
+    {% endfor %}
+  </fieldset>
+
+  <div class="form-actions">
+    <button class="button primary" type="submit">{{ 'Modifier' if isEdit else 'Ajouter' }}</button>
+    <a class="button ghost" href="{{ url_for('films.getFilms') }}">Annuler</a>
+  </div>
+</form>
+{% endblock %}
