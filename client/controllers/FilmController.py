@@ -86,8 +86,9 @@ def createFilmBlueprint(
         idDirector = request.args.get("director", type=int)
         idLanguage = request.args.get("language", type=int)
         idActor = request.args.get("actor", type=int)
+        idSupportType = request.args.get("supportType", type=int)
         films = filmService.searchFilms(
-            title, idGenre, idDirector, idLanguage, idActor
+            title, idGenre, idDirector, idLanguage, idActor, idSupportType
         )
         return render_template(
             "films/list.html",
@@ -96,12 +97,14 @@ def createFilmBlueprint(
             directors=directorService.getAllDirectors(),
             languages=languageService.getAllLanguages(),
             actors=actorService.getAllActors(),
+            supportTypes=supportTypeService.getAllSupportTypes(),
             filters={
                 "title": title,
                 "genre": idGenre,
                 "director": idDirector,
                 "language": idLanguage,
                 "actor": idActor,
+                "supportType": idSupportType,
             },
         )
 

@@ -45,6 +45,14 @@
       {% endfor %}
     </select>
   </label>
+  <label>Type de support
+    <select name="supportType">
+      <option value="">Tous</option>
+      {% for supportType in supportTypes %}
+        <option value="{{ supportType.idSupportType }}" {% if filters.supportType|string == supportType.idSupportType|string %}selected{% endif %}>{{ supportType.name }} ({{ supportType.mode }})</option>
+      {% endfor %}
+    </select>
+  </label>
   <button class="button primary" type="submit">Rechercher</button>
 </form>
 

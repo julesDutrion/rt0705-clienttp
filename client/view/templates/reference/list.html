@@ -52,6 +52,11 @@
             <form class="inline-action" method="post" action="{{ url_for('actors.deleteActor', idActor=entityId) }}">
               <button class="danger-link" type="submit">Supprimer</button>
             </form>
+          {% elif blueprint == 'support_types' %}
+            <a class="table-action" href="{{ url_for('support_types.editSupportType', idSupportType=entityId) }}">Modifier</a>
+            <form class="inline-action" method="post" action="{{ url_for('support_types.deleteSupportType', idSupportType=entityId) }}">
+              <button class="danger-link" type="submit">Supprimer</button>
+            </form>
           {% endif %}
         </td>
       </tr>

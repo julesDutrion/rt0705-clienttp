@@ -10,6 +10,7 @@ from controllers import (
     createGenreBlueprint,
     createLanguageBlueprint,
     createActorBlueprint,
+    createSupportTypeBlueprint,
 )
 from ErrorHandlers import registerErrorHandlers
 from services import (
@@ -64,6 +65,7 @@ def createApp() -> Flask:
     app.register_blueprint(createGenreBlueprint(genreService))
     app.register_blueprint(createLanguageBlueprint(languageService))
     app.register_blueprint(createClassificationBlueprint(classificationService))
+    app.register_blueprint(createSupportTypeBlueprint(supportTypeService))
 
     @app.get("/")
     def index():

@@ -4,3 +4,4 @@ from .FilmController import createFilmBlueprint
 from .GenreController import createGenreBlueprint
 from .LanguageController import createLanguageBlueprint
 from .ActorController import createActorBlueprint
+from .SupportTypeController import createSupportTypeBlueprint

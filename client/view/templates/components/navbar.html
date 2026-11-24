@@ -11,6 +11,7 @@
       <a href="{{ url_for('languages.getLanguages') }}" class="{% if request.blueprint == 'languages' %}active{% endif %}">Langues</a>
       <a href="{{ url_for('classifications.getClassifications') }}" class="{% if request.blueprint == 'classifications' %}active{% endif %}">Classifications</a>
       <a href="{{ url_for('actors.getActors') }}" class="{% if request.blueprint == 'actors' %}active{% endif %}">Acteurs</a>
+      <a href="{{ url_for('support_types.getSupportTypes') }}" class="{% if request.blueprint == 'support_types' %}active{% endif %}">Types de supports</a>
     </div>
   </nav>
 </header>

@@ -54,6 +54,7 @@ class FilmService:
         idDirector: Optional[int] = None,
         idLanguage: Optional[int] = None,
         idActor: Optional[int] = None,
+        idSupportType: Optional[int] = None,
     ) -> List[FilmDTO]:
         """Sans critère : tout le catalogue. Les critères se cumulent (ET), comme côté API."""
         params: Dict[str, Any] = {}
@@ -67,6 +68,8 @@ class FilmService:
             params["language"] = idLanguage
         if idActor is not None:
             params["actor"] = idActor
+        if idSupportType is not None:
+            params["supportType"] = idSupportType
         data = self._apiClient.get("/films", params=params or None)
         return [FilmDTO.fromDict(item) for item in data]
 

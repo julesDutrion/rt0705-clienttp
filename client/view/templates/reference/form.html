@@ -16,6 +16,14 @@
     {% endif %}
     <p>
       <label for="{{ field.name }}">{{ field.label }}</label>
+      {% if field.options %}
+      <select id="{{ field.name }}" name="{{ field.name }}" required>
+        <option value="">Choisir…</option>
+        {% for option in field.options %}
+          <option value="{{ option.value }}" {% if value|string == option.value|string %}selected{% endif %}>{{ option.label }}</option>
+        {% endfor %}
+      </select>
+      {% else %}
       <input
         id="{{ field.name }}"
         name="{{ field.name }}"
@@ -24,6 +32,7 @@
         {% if isEdit and field.name.startswith('id') %}readonly{% endif %}
         required
       >
+      {% endif %}
     </p>
     {% endif %}
   {% endfor %}
