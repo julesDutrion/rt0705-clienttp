@@ -20,6 +20,8 @@ from services import (
     GenreService,
     LanguageService,
     ActorService,
+    SupportService,
+    SupportTypeService,
 )
 
 
@@ -34,6 +36,8 @@ def createApp() -> Flask:
     languageService = LanguageService(apiClient)
     classificationService = ClassificationService(apiClient)
     actorService = ActorService(apiClient)
+    supportService = SupportService(apiClient)
+    supportTypeService = SupportTypeService(apiClient)
     filmService = FilmService(
         apiClient,
         directorService,
@@ -41,6 +45,8 @@ def createApp() -> Flask:
         languageService,
         classificationService,
         actorService,
+        supportService,
+        supportTypeService,
     )
 
     # Contrôleurs
@@ -51,6 +57,7 @@ def createApp() -> Flask:
         languageService,
         classificationService,
         actorService,
+        supportTypeService,
     ))
     app.register_blueprint(createActorBlueprint(actorService))
     app.register_blueprint(createDirectorBlueprint(directorService))

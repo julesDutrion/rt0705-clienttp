@@ -6,25 +6,32 @@ les clés JSON de l'API correspondent exactement au modèle.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, fields, is_dataclass
-from datetime import date
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from typing import Any, Dict, Optional
+
 from .BaseDTO import BaseDTO
+from .SupportTypeDTO import SupportTypeDTO
 
 @dataclass
 class SupportDTO(BaseDTO):
-    idSupport: int
-    storageLocation: str
-    filePath: str
-    fileSize: int
-    fileFormat: str
+    idFilm: str
+    idSupportType: int
+    idSupport: Optional[int] = None
+    location: Optional[str] = None
+    url: Optional[str] = None
+    supportType: Optional[SupportTypeDTO] = None
 
     @classmethod
     def fromDict(cls, data: Dict[str, Any]) -> "SupportDTO":
         return cls(
-            idSupport=data["idSupport"],
-            storageLocation=data["storageLocation"],
-            filePath=data["filePath"],
-            fileSize=data["fileSize"],
-            fileFormat=data["fileFormat"],
+            idSupport=data.get("idSupport"),
+            idFilm=data["idFilm"],
+            idSupportType=data["idSupportType"],
+            location=data.get("location"),
+            url=data.get("url"),
+            supportType=(
+                SupportTypeDTO.fromDict(data["supportType"])
+                if data.get("supportType")
+                else None
+            ),
         )

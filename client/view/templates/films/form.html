@@ -68,9 +68,96 @@
     {% endfor %}
   </fieldset>
 
+  <fieldset class="support-fieldset">
+    <legend>Supports</legend>
+    <input type="hidden" name="supportsSubmitted" value="1">
+    <div id="support-rows">
+      {% for support in film.supports|default([], true) %}
+        <div class="support-row" data-support-row>
+          <input type="hidden" name="supportIds" value="{{ support.idSupport|default('', true) }}">
+          <label>Type de support
+            <select name="supportTypeIds" required data-support-type>
+              <option value="">Choisir un type</option>
+              {% for supportType in supportTypes %}
+                <option value="{{ supportType.idSupportType }}" data-mode="{{ supportType.mode }}" {% if support.idSupportType|string == supportType.idSupportType|string %}selected{% endif %}>{{ supportType.name }} ({{ supportType.mode }})</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label data-physical-field hidden>Localisation
+            <input name="supportLocations" value="{{ support.location|default('', true) }}" placeholder="Ex. étagère A3">
+          </label>
+          <label data-digital-field hidden>URL de streaming
+            <input type="url" name="supportUrls" value="{{ support.url|default('', true) }}" placeholder="https://…">
+          </label>
+          <button class="button ghost" type="button" data-remove-support>Supprimer ce support</button>
+        </div>
+      {% endfor %}
+    </div>
+    <button class="button ghost" type="button" id="add-support">Ajouter un support</button>
+  </fieldset>
+
   <div class="form-actions">
     <button class="button primary" type="submit">{{ 'Modifier' if isEdit else 'Ajouter' }}</button>
     <a class="button ghost" href="{{ url_for('films.getFilms') }}">Annuler</a>
   </div>
 </form>
+
+<template id="support-row-template">
+  <div class="support-row" data-support-row>
+    <input type="hidden" name="supportIds" value="">
+    <label>Type de support
+      <select name="supportTypeIds" required data-support-type>
+        <option value="">Choisir un type</option>
+        {% for supportType in supportTypes %}
+          <option value="{{ supportType.idSupportType }}" data-mode="{{ supportType.mode }}">{{ supportType.name }} ({{ supportType.mode }})</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label data-physical-field hidden>Localisation
+      <input name="supportLocations" placeholder="Ex. étagère A3">
+    </label>
+    <label data-digital-field hidden>URL de streaming
+      <input type="url" name="supportUrls" placeholder="https://…">
+    </label>
+    <button class="button ghost" type="button" data-remove-support>Supprimer ce support</button>
+  </div>
+</template>
+
+<script>
+  const supportRows = document.getElementById("support-rows");
+  const supportTemplate = document.getElementById("support-row-template");
+
+  function updateSupportFields(row) {
+    const typeSelect = row.querySelector("[data-support-type]");
+    const mode = typeSelect.selectedOptions[0]?.dataset.mode;
+    const physicalField = row.querySelector("[data-physical-field]");
+    const digitalField = row.querySelector("[data-digital-field]");
+    const locationInput = physicalField.querySelector("input");
+    const urlInput = digitalField.querySelector("input");
+
+    physicalField.hidden = mode !== "physical";
+    digitalField.hidden = mode !== "digital";
+    locationInput.required = mode === "physical";
+    urlInput.required = mode === "digital";
+    if (mode === "physical") urlInput.value = "";
+    if (mode === "digital") locationInput.value = "";
+  }
+
+  supportRows.querySelectorAll("[data-support-row]").forEach((row) => {
+    updateSupportFields(row);
+    row.querySelector("[data-support-type]").addEventListener("change", () => updateSupportFields(row));
+  });
+
+  document.getElementById("add-support").addEventListener("click", () => {
+    const row = supportTemplate.content.firstElementChild.cloneNode(true);
+    supportRows.appendChild(row);
+    row.querySelector("[data-support-type]").addEventListener("change", () => updateSupportFields(row));
+    row.querySelector("[data-remove-support]").addEventListener("click", () => row.remove());
+    updateSupportFields(row);
+  });
+
+  supportRows.querySelectorAll("[data-remove-support]").forEach((button) => {
+    button.addEventListener("click", () => button.closest("[data-support-row]").remove());
+  });
+</script>
 {% endblock %}

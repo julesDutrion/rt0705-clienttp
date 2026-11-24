@@ -11,6 +11,7 @@ from services import (
     FilmService,
     GenreService,
     LanguageService,
+    SupportTypeService,
 )
 
 
@@ -21,6 +22,13 @@ def _formToPrefill(form: MultiDict, idFilm: Optional[str] = None) -> Dict[str, A
         value = form.get(key)
         return {nestedKey: value} if value else None
 
+    supportFields = [
+        form.getlist("supportIds"),
+        form.getlist("supportTypeIds"),
+        form.getlist("supportLocations"),
+        form.getlist("supportUrls"),
+    ]
+    supportCount = max(map(len, supportFields), default=0)
     return {
         "idFilm": idFilm or form.get("idFilm", ""),
         "title": form.get("title", ""),
@@ -35,6 +43,18 @@ def _formToPrefill(form: MultiDict, idFilm: Optional[str] = None) -> Dict[str, A
         "languages": [{"idLanguage": value} for value in form.getlist("idLanguages")],
         "genre": [{"idGenre": value} for value in form.getlist("idGenres")],
         "actors": [{"idActor": value} for value in form.getlist("idActors")],
+        "supports": [
+            {
+                "idSupport": idSupport or None,
+                "idSupportType": idSupportType,
+                "location": location,
+                "url": url,
+            }
+            for idSupport, idSupportType, location, url in (
+                tuple(values[index] if index < len(values) else "" for values in supportFields)
+                for index in range(supportCount)
+            )
+        ],
     }
 
 
@@ -45,6 +65,7 @@ def createFilmBlueprint(
     languageService: LanguageService,
     classificationService: ClassificationService,
     actorService: ActorService,
+    supportTypeService: SupportTypeService,
 ) -> Blueprint:
     blueprint = Blueprint("films", __name__, url_prefix="/films")
 
@@ -55,6 +76,7 @@ def createFilmBlueprint(
             "languages": languageService.getAllLanguages(),
             "genres": genreService.getAllGenres(),
             "actors": actorService.getAllActors(),
+            "supportTypes": supportTypeService.getAllSupportTypes(),
         }
 
     @blueprint.get("")

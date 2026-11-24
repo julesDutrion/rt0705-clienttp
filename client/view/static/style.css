@@ -200,6 +200,22 @@ fieldset {
 fieldset legend { padding: 0 7px; font-weight: 800; }
 fieldset label { display: inline-flex; gap: 8px; margin: 5px 18px 8px 0; font-weight: 600; }
 fieldset input[type="checkbox"] { width: 18px; min-height: 18px; accent-color: var(--violet); }
+.support-fieldset { display: grid; gap: 14px; }
+.support-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  align-items: end;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fbfcff;
+}
+.support-row label { display: grid; gap: 8px; }
+.support-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.support-card { padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--paper); }
+.support-card h3 { margin: 0 0 8px; }
+.support-card p { margin: 7px 0; }
 .form-actions { display: flex; gap: 10px; margin-top: 24px; }
 
 .filter-card {

@@ -6,5 +6,6 @@ from .DirectorDTO import DirectorDTO
 from .GenreDTO import GenreDTO
 from .ClassificationDTO import ClassificationDTO
 from .SupportDTO import SupportDTO
+from .SupportTypeDTO import SupportTypeDTO
 from .LanguageDTO import LanguageDTO
 from .FilmDTO import FilmDTO

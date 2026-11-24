@@ -1,10 +1,15 @@
 from datetime import date
 from typing import Any, Dict, List, Optional
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 from werkzeug.datastructures import MultiDict
 
-from exceptions import InvalidReferenceError, InvalidRequestError
+from exceptions import (
+    USER_INPUT_ERRORS,
+    ApiError,
+    InvalidReferenceError,
+    InvalidRequestError,
+)
 from models import ActorDTO, FilmDTO, SupportDTO
 
 from .ApiClient import ApiClient
@@ -14,6 +19,8 @@ from .FormParser import FormParser
 from .GenreService import GenreService
 from .LanguageService import LanguageService
 from .ActorService import ActorService
+from .SupportService import SupportService
+from .SupportTypeService import SupportTypeService
 
 
 class FilmService:
@@ -25,6 +32,8 @@ class FilmService:
         languageService: LanguageService,
         classificationService: ClassificationService,
         actorService: ActorService,
+        supportService: SupportService,
+        supportTypeService: SupportTypeService,
     ) -> None:
         self._apiClient = apiClient
         self._directorService = directorService
@@ -32,6 +41,8 @@ class FilmService:
         self._languageService = languageService
         self._classificationService = classificationService
         self._actorService = actorService
+        self._supportService = supportService
+        self._supportTypeService = supportTypeService
 
     # ------------------------------------------------------------------ #
     # Lecture
@@ -66,25 +77,55 @@ class FilmService:
     # Écriture
     # ------------------------------------------------------------------ #
     def createFilmFromForm(self, form: MultiDict) -> Optional[FilmDTO]:
-        film = self._buildFilm(
-            form, idFilm=None, addedDate=date.today(), support=None
+        supports = (
+            self._buildSupports(form, "", [])
+            if form.get("supportsSubmitted") == "1"
+            else []
         )
-        payload = film.toDict()
-        payload.pop("idFilm", None)
-        createdFilm = self._apiClient.post("/films", payload)
-        return FilmDTO.fromDict(createdFilm) if createdFilm else None
+        film = self._buildFilm(form, idFilm=None, addedDate=date.today())
+        createdFilm = self._apiClient.post("/films", self._filmPayload(film, includeId=False))
+        if not createdFilm:
+            raise ApiError("L'API n'a pas renvoyé le film créé.")
+
+        created = FilmDTO.fromDict(createdFilm)
+        if supports:
+            try:
+                for support in supports:
+                    support.idFilm = created.idFilm
+                    self._supportService.createSupport(support)
+            except USER_INPUT_ERRORS as error:
+                raise ApiError(
+                    "Le film a été créé, mais ses supports n'ont pas tous été enregistrés."
+                ) from error
+            return self.getFilmById(created.idFilm)
+        return created
 
     def updateFilmFromForm(self, existingFilm: FilmDTO, form: MultiDict) -> FilmDTO:
-        """Conserve le support et la date d'ajout tout en modifiant les acteurs
-        sélectionnés et les autres associations du formulaire."""
+        """Met à jour les informations du film et, si soumis, ses supports."""
+        supportsSubmitted = form.get("supportsSubmitted") == "1"
+        supports = (
+            self._buildSupports(form, existingFilm.idFilm, existingFilm.supports)
+            if supportsSubmitted
+            else []
+        )
         film = self._buildFilm(
             form,
             idFilm=existingFilm.idFilm,
             addedDate=existingFilm.addedDate,
-            support=existingFilm.support,
         )
         path = f"/films/{quote(film.idFilm, safe='')}"
-        return FilmDTO.fromDict(self._apiClient.put(path, film.toDict()))
+        updated = FilmDTO.fromDict(
+            self._apiClient.put(path, self._filmPayload(film, includeId=True))
+        )
+        if supportsSubmitted:
+            try:
+                self._syncSupports(existingFilm.supports, supports)
+            except USER_INPUT_ERRORS as error:
+                raise ApiError(
+                    "Le film a été modifié, mais ses supports n'ont pas tous été synchronisés."
+                ) from error
+            return self.getFilmById(film.idFilm)
+        return updated
 
     def deleteFilm(self, idFilm: str) -> None:
         self._apiClient.delete(f"/films/{quote(idFilm, safe='')}")
@@ -97,7 +138,6 @@ class FilmService:
         form: MultiDict,
         idFilm: Optional[str],
         addedDate: date,
-        support: Optional[SupportDTO],
     ) -> FilmDTO:
         duration = FormParser.requiredInteger(form, "duration", "Durée")
         if duration <= 0:
@@ -127,7 +167,6 @@ class FilmService:
                 FormParser.optionalInteger(form, "idClassification", "Classification"),
                 "Classification",
             ),
-            support=support,
             nativeLanguage=self._pickOne(
                 languages,
                 FormParser.optionalInteger(form, "idNativeLanguage", "Langue d'origine"),
@@ -145,6 +184,135 @@ class FilmService:
                 "Acteur",
             ),
         )
+
+    def _buildSupports(
+        self,
+        form: MultiDict,
+        idFilm: str,
+        existingSupports: List[SupportDTO],
+    ) -> List[SupportDTO]:
+        supportIds = form.getlist("supportIds")
+        supportTypeIds = form.getlist("supportTypeIds")
+        locations = form.getlist("supportLocations")
+        urls = form.getlist("supportUrls")
+        rowCount = len(supportTypeIds)
+        if any(len(values) != rowCount for values in (supportIds, locations, urls)):
+            raise InvalidRequestError("Les informations des supports sont incomplètes.")
+
+        supportTypes = {
+            supportType.idSupportType: supportType
+            for supportType in self._supportTypeService.getAllSupportTypes()
+        }
+        existingById = {
+            support.idSupport: support
+            for support in existingSupports
+            if support.idSupport is not None
+        }
+        parsedSupports: List[SupportDTO] = []
+        seenIds = set()
+
+        for rawId, rawTypeId, rawLocation, rawUrl in zip(
+            supportIds, supportTypeIds, locations, urls
+        ):
+            try:
+                idSupport = int(rawId) if rawId.strip() else None
+                idSupportType = int(rawTypeId)
+            except ValueError:
+                raise InvalidRequestError("Un identifiant de support est invalide.")
+
+            supportType = supportTypes.get(idSupportType)
+            if supportType is None:
+                raise InvalidReferenceError(
+                    f"Type de support {idSupportType} : élément inexistant."
+                )
+            if idSupport is not None:
+                if idSupport not in existingById or idSupport in seenIds:
+                    raise InvalidReferenceError(
+                        f"Le support {idSupport} n'est pas associé à ce film."
+                    )
+                seenIds.add(idSupport)
+
+            location = rawLocation.strip()
+            url = rawUrl.strip()
+            if supportType.mode == "physical":
+                if not location:
+                    raise InvalidRequestError(
+                        "La localisation est obligatoire pour un support physique."
+                    )
+                parsedSupports.append(
+                    SupportDTO(
+                        idFilm=idFilm,
+                        idSupportType=idSupportType,
+                        idSupport=idSupport,
+                        location=location,
+                    )
+                )
+            elif supportType.mode == "digital":
+                try:
+                    parsedUrl = urlparse(url)
+                    isValidUrl = (
+                        parsedUrl.scheme in {"http", "https"}
+                        and bool(parsedUrl.hostname)
+                    )
+                except ValueError:
+                    isValidUrl = False
+                if not isValidUrl:
+                    raise InvalidRequestError(
+                        "L'URL doit être une adresse HTTP ou HTTPS valide."
+                    )
+                parsedSupports.append(
+                    SupportDTO(
+                        idFilm=idFilm,
+                        idSupportType=idSupportType,
+                        idSupport=idSupport,
+                        url=url,
+                    )
+                )
+            else:
+                raise InvalidRequestError(
+                    f"Mode de support non pris en charge : {supportType.mode}."
+                )
+        return parsedSupports
+
+    def _syncSupports(
+        self,
+        existingSupports: List[SupportDTO],
+        submittedSupports: List[SupportDTO],
+    ) -> None:
+        existingById = {
+            support.idSupport: support
+            for support in existingSupports
+            if support.idSupport is not None
+        }
+        retainedIds = {
+            support.idSupport
+            for support in submittedSupports
+            if support.idSupport is not None
+        }
+        for support in submittedSupports:
+            if support.idSupport is None:
+                self._supportService.createSupport(support)
+            elif self._supportChanged(existingById[support.idSupport], support):
+                self._supportService.updateSupport(support)
+        for support in existingSupports:
+            if support.idSupport is not None and support.idSupport not in retainedIds:
+                self._supportService.deleteSupport(support.idSupport)
+
+    @staticmethod
+    def _supportChanged(existing: SupportDTO, submitted: SupportDTO) -> bool:
+        return (
+            existing.idSupportType != submitted.idSupportType
+            or existing.location != submitted.location
+            or existing.url != submitted.url
+        )
+
+    @staticmethod
+    def _filmPayload(film: FilmDTO, includeId: bool) -> Dict[str, Any]:
+        payload = film.toDict()
+        payload.pop("supports", None)
+        if not includeId:
+            payload.pop("idFilm", None)
+        return payload
 
     @staticmethod
     def _pickOne(catalog: Dict[int, Any], identifier: Optional[int], label: str) -> Optional[Any]:
