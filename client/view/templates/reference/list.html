@@ -1,0 +1,63 @@
+{% extends "components/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Catalogue</p>
+    <h1>{{ title }}</h1>
+  </div>
+  {% if createEndpoint %}
+    <a class="button primary" href="{{ url_for(createEndpoint) }}">+ Ajouter</a>
+  {% endif %}
+</div>
+<div class="table-shell">
+<table class="data-table">
+  <thead>
+    <tr>
+      {% for column in columns %}<th>{{ column.label }}</th>{% endfor %}
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+      <tr>
+        {% for column in columns %}
+          <td>{{ attribute(item, column.key) }}</td>
+        {% endfor %}
+        <td>
+          {% set blueprint = request.blueprint %}
+          {% set entityId = attribute(item, idKey) %}
+          {% if blueprint == 'directors' %}
+            <a class="table-action" href="{{ url_for('directors.editDirector', idDirector=entityId) }}">Modifier</a>
+            <form class="inline-action" method="post" action="{{ url_for('directors.deleteDirector', idDirector=entityId) }}">
+              <button class="danger-link" type="submit">Supprimer</button>
+            </form>
+          {% elif blueprint == 'genres' %}
+            <a class="table-action" href="{{ url_for('genres.editGenre', idGenre=entityId) }}">Modifier</a>
+            <form class="inline-action" method="post" action="{{ url_for('genres.deleteGenre', idGenre=entityId) }}">
+              <button class="danger-link" type="submit">Supprimer</button>
+            </form>
+          {% elif blueprint == 'languages' %}
+            <a class="table-action" href="{{ url_for('languages.editLanguage', idLanguage=entityId) }}">Modifier</a>
+            <form class="inline-action" method="post" action="{{ url_for('languages.deleteLanguage', idLanguage=entityId) }}">
+              <button class="danger-link" type="submit">Supprimer</button>
+            </form>
+          {% elif blueprint == 'classifications' %}
+            <a class="table-action" href="{{ url_for('classifications.editClassification', idClassification=entityId) }}">Modifier</a>
+            <form class="inline-action" method="post" action="{{ url_for('classifications.deleteClassification', idClassification=entityId) }}">
+              <button class="danger-link" type="submit">Supprimer</button>
+            </form>
+          {% elif blueprint == 'actors' %}
+            <a class="table-action" href="{{ url_for('actors.editActor', idActor=entityId) }}">Modifier</a>
+            <form class="inline-action" method="post" action="{{ url_for('actors.deleteActor', idActor=entityId) }}">
+              <button class="danger-link" type="submit">Supprimer</button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% if not items %}<p>Aucun élément.</p>{% endif %}
+</div>
+{% endblock %}

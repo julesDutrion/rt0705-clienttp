@@ -1,0 +1,16 @@
+<header class="site-header">
+  <nav class="navbar" aria-label="Navigation principale">
+    <a class="brand" href="{{ url_for('films.getFilms') }}">
+      <span class="brand-mark">V</span>
+      <span>Vidéothèque</span>
+    </a>
+    <div class="nav-links">
+      <a href="{{ url_for('films.getFilms') }}" class="{% if request.blueprint == 'films' %}active{% endif %}">Films</a>
+      <a href="{{ url_for('directors.getDirectors') }}" class="{% if request.blueprint == 'directors' %}active{% endif %}">Réalisateurs</a>
+      <a href="{{ url_for('genres.getGenres') }}" class="{% if request.blueprint == 'genres' %}active{% endif %}">Genres</a>
+      <a href="{{ url_for('languages.getLanguages') }}" class="{% if request.blueprint == 'languages' %}active{% endif %}">Langues</a>
+      <a href="{{ url_for('classifications.getClassifications') }}" class="{% if request.blueprint == 'classifications' %}active{% endif %}">Classifications</a>
+      <a href="{{ url_for('actors.getActors') }}" class="{% if request.blueprint == 'actors' %}active{% endif %}">Acteurs</a>
+    </div>
+  </nav>
+</header>

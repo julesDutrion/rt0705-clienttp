@@ -1,0 +1,35 @@
+{% extends "components/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">{{ 'Modification' if isEdit else 'Nouvel élément' }}</p>
+    <h1>{{ title }}</h1>
+  </div>
+</div>
+<form class="form-card" method="post">
+  {% for field in fields %}
+    {% if isEdit or not field.name.startswith('id') %}
+    {% set value = '' %}
+    {% if values %}
+      {% set value = attribute(values, field.name) if attribute(values, field.name, undefined) is not undefined else '' %}
+    {% endif %}
+    <p>
+      <label for="{{ field.name }}">{{ field.label }}</label>
+      <input
+        id="{{ field.name }}"
+        name="{{ field.name }}"
+        type="{{ field.type|default('text') }}"
+        value="{{ value if value is not none else '' }}"
+        {% if isEdit and field.name.startswith('id') %}readonly{% endif %}
+        required
+      >
+    </p>
+    {% endif %}
+  {% endfor %}
+  <div class="form-actions">
+    <button class="button primary" type="submit">{{ 'Modifier' if isEdit else 'Ajouter' }}</button>
+    <a class="button ghost" href="{{ url_for(cancelEndpoint) }}">Annuler</a>
+  </div>
+</form>
+{% endblock %}

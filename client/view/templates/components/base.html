@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Vidéothèque{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  {% include "components/navbar.html" %}
+  <main>
+    {% include "components/flash_messages.html" %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
