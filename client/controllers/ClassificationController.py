@@ -24,6 +24,7 @@ def createClassificationBlueprint(classificationService: ClassificationService) 
             title="Classifications",
             items=classificationService.getAllClassifications(),
             columns=_COLUMNS,
+            idKey="idClassification",
             createEndpoint="classifications.newClassification",
         )
 

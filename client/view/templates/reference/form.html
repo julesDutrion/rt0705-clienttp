@@ -12,7 +12,7 @@
     {% if isEdit or not field.name.startswith('id') %}
     {% set value = '' %}
     {% if values %}
-      {% set value = attribute(values, field.name) if attribute(values, field.name, undefined) is not undefined else '' %}
+      {% set value = values[field.name] if values[field.name] is not undefined else '' %}
     {% endif %}
     <p>
       <label for="{{ field.name }}">{{ field.label }}</label>
