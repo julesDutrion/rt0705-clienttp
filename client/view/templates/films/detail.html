@@ -9,6 +9,11 @@
   </div>
   <a class="button primary" href="{{ url_for('films.editFilm', idFilm=film.idFilm) }}">Modifier</a>
 </div>
+{% if film.posterUrl %}
+  <figure class="film-detail-poster">
+    <img src="{{ film.posterUrl }}" alt="Affiche de {{ film.title }}" loading="lazy" decoding="async">
+  </figure>
+{% endif %}
 <p>{{ film.releaseDate }} · {{ film.duration }} min</p>
 
 <h2>Synopsis</h2>

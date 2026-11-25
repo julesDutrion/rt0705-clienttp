@@ -1,6 +1,6 @@
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 
-from exceptions import NotFoundError, USER_INPUT_ERRORS
+from exceptions import USER_INPUT_ERRORS
 from services import LanguageService
 
 _COLUMNS = [
@@ -19,20 +19,19 @@ def createLanguageBlueprint(languageService: LanguageService) -> Blueprint:
     blueprint = Blueprint("languages", __name__, url_prefix="/languages")
 
     @blueprint.get("/search")
-    def searchLanguagesByCode():
-        code = (request.args.get("q") or "").strip()
-        if not code:
+    def searchLanguages():
+        name = (request.args.get("q") or "").strip()
+        if not name:
             return jsonify([])
-        try:
-            language = languageService.getLanguageByCode(code)
-        except NotFoundError:
-            return jsonify([])
-        return jsonify([
-            {
-                "id": language.idLanguage,
-                "label": f"{language.name} ({language.code})",
-            }
-        ])
+        return jsonify(
+            [
+                {
+                    "id": language.idLanguage,
+                    "label": f"{language.name} ({language.code})",
+                }
+                for language in languageService.searchLanguagesByName(name)
+            ]
+        )
 
     @blueprint.get("")
     def getLanguages():

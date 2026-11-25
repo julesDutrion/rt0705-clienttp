@@ -15,6 +15,10 @@ class LanguageService:
     def getAllLanguages(self) -> List[LanguageDTO]:
         return [LanguageDTO.fromDict(data) for data in self._apiClient.get("/languages")]
 
+    def searchLanguagesByName(self, name: str) -> List[LanguageDTO]:
+        data = self._apiClient.get("/languages", params={"name": name})
+        return [LanguageDTO.fromDict(item) for item in data]
+
     def getLanguageById(self, idLanguage: int) -> LanguageDTO:
         return LanguageDTO.fromDict(self._apiClient.get(f"/languages/{idLanguage}"))
 

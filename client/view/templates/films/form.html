@@ -57,10 +57,10 @@
       {% set selectedNativeLabel = film.nativeLanguage.name ~ ' (' ~ film.nativeLanguage.code ~ ')' %}
     {% endif %}
   {% endif %}
-  <fieldset class="entity-selector" data-entity-selector data-selection-mode="single" data-input-name="idNativeLanguage" data-search-url="{{ url_for('languages.searchLanguagesByCode') }}" data-min-query-length="1">
+  <fieldset class="entity-selector" data-entity-selector data-selection-mode="single" data-input-name="idNativeLanguage" data-search-url="{{ url_for('languages.searchLanguages') }}" data-min-query-length="1">
     <legend>Langue d'origine</legend>
     <label>Rechercher une langue
-      <input type="search" data-entity-search placeholder="Code exact (ex. fr)" autocomplete="off">
+      <input type="search" data-entity-search placeholder="Nom ou partie du nom (ex. French)" autocomplete="off">
     </label>
     <ul class="selected-entities" data-selected-items aria-live="polite"></ul>
     <div class="entity-results" data-search-results role="listbox" aria-label="Résultats des langues d'origine"></div>
@@ -72,10 +72,10 @@
     </div>
   </fieldset>
 
-  <fieldset class="entity-selector" data-entity-selector data-selection-mode="multiple" data-input-name="idLanguages" data-search-url="{{ url_for('languages.searchLanguagesByCode') }}" data-min-query-length="1">
+  <fieldset class="entity-selector" data-entity-selector data-selection-mode="multiple" data-input-name="idLanguages" data-search-url="{{ url_for('languages.searchLanguages') }}" data-min-query-length="1">
     <legend>Langues disponibles</legend>
     <label>Rechercher une langue
-      <input type="search" data-entity-search placeholder="Code exact (ex. fr)" autocomplete="off">
+      <input type="search" data-entity-search placeholder="Nom ou partie du nom (ex. French)" autocomplete="off">
     </label>
     <ul class="selected-entities" data-selected-items aria-live="polite"></ul>
     <div class="entity-results" data-search-results role="listbox" aria-label="Résultats des langues disponibles"></div>
