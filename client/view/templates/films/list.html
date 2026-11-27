@@ -1,12 +1,12 @@
 {% extends "components/base.html" %}
-{% block title %}Films{% endblock %}
+{% block title %}Catalogue{% endblock %}
 {% block content %}
 <div class="page-heading">
   <div>
     <p class="eyebrow">Collection</p>
-    <h1>Films</h1>
+    <h1>Catalogue</h1>
   </div>
-  <a class="button primary" href="{{ url_for('films.newFilm') }}">+ Ajouter un film</a>
+  {% if canPublish %}<a class="button primary" href="{{ url_for('films.newFilm') }}">+ Ajouter un film</a>{% endif %}
 </div>
 
 <form class="filter-card" method="get" action="{{ url_for('films.getFilms') }}">
@@ -73,7 +73,7 @@
 
 <script src="{{ url_for('static', filename='film-form.js') }}" defer></script>
 
-<section class="film-grid" aria-label="Films">
+<section class="film-grid" aria-label="Catalogue">
 {% for film in films %}
   <article class="film-card">
     <a class="film-poster" href="{{ url_for('films.getFilm', idFilm=film.idFilm) }}" aria-label="Voir {{ film.title }}">
@@ -98,12 +98,12 @@
       </p>
       <div class="film-card-actions">
         <a href="{{ url_for('films.getFilm', idFilm=film.idFilm) }}">Détails</a>
-        <a href="{{ url_for('films.editFilm', idFilm=film.idFilm) }}">Modifier</a>
+        {% if canPublish %}<a href="{{ url_for('films.editFilm', idFilm=film.idFilm) }}">Modifier</a>{% endif %}
       </div>
     </div>
   </article>
 {% else %}
-  <p class="film-empty">Aucun film trouvé.</p>
+  <p class="film-empty">Aucun résultat dans le catalogue.</p>
 {% endfor %}
 </section>
 {% endblock %}

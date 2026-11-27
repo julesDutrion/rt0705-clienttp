@@ -5,3 +5,4 @@ from .GenreController import createGenreBlueprint
 from .LanguageController import createLanguageBlueprint
 from .ActorController import createActorBlueprint
 from .SupportTypeController import createSupportTypeBlueprint
+from .AccountController import createAccountBlueprint

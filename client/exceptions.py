@@ -10,6 +10,14 @@ class ApiUnavailableError(ApiError):
     pass
 
 
+class AuthenticationError(ClientError):
+    pass
+
+
+class ForbiddenError(ClientError):
+    pass
+
+
 class InvalidRequestError(ClientError):
     pass
 

@@ -6,7 +6,7 @@
     <p class="eyebrow">Catalogue</p>
     <h1>{{ title }}</h1>
   </div>
-  {% if createEndpoint %}
+  {% if createEndpoint and canPublish %}
     <a class="button primary" href="{{ url_for(createEndpoint) }}">+ Ajouter</a>
   {% endif %}
 </div>
@@ -15,7 +15,7 @@
   <thead>
     <tr>
       {% for column in columns %}<th>{{ column.label }}</th>{% endfor %}
-      <th>Actions</th>
+      {% if canPublish %}<th>Actions</th>{% endif %}
     </tr>
   </thead>
   <tbody>
@@ -24,6 +24,7 @@
         {% for column in columns %}
           <td>{{ item|attr(column.key) }}</td>
         {% endfor %}
+        {% if canPublish %}
         <td>
           {% set blueprint = request.blueprint %}
           {% set entityId = item|attr(idKey) %}
@@ -59,6 +60,7 @@
             </form>
           {% endif %}
         </td>
+        {% endif %}
       </tr>
     {% endfor %}
   </tbody>

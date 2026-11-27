@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 import requests
 
@@ -6,7 +6,9 @@ from exceptions import (
     AlreadyExistsError,
     ApiError,
     ApiUnavailableError,
+    AuthenticationError,
     ClientError,
+    ForbiddenError,
     InvalidReferenceError,
     InvalidRequestError,
     NotFoundError,
@@ -15,6 +17,8 @@ from exceptions import (
 # Codes HTTP de l'API -> exceptions du client
 _STATUS_TO_ERROR: Dict[int, type] = {
     400: InvalidRequestError,
+    401: AuthenticationError,
+    403: ForbiddenError,
     404: NotFoundError,
     409: AlreadyExistsError,
     422: InvalidReferenceError,
@@ -24,22 +28,37 @@ _STATUS_TO_ERROR: Dict[int, type] = {
 class ApiClient:
     """Transport HTTP vers l'API : seul endroit qui connaît `requests` et les codes de retour."""
 
-    def __init__(self, baseUrl: str, timeout: float = 5.0) -> None:
+    def __init__(
+        self,
+        baseUrl: str,
+        timeout: float = 5.0,
+        accessTokenProvider: Optional[Callable[[], Optional[str]]] = None,
+    ) -> None:
         self._baseUrl = baseUrl.rstrip("/")
         self._timeout = timeout
+        self._accessTokenProvider = accessTokenProvider
         self._session = requests.Session()
 
-    def get(self, path: str, params: Optional[Dict[str, Any]] = None) -> Any:
-        return self._request("GET", path, params=params)
+    def get(
+        self,
+        path: str,
+        params: Optional[Dict[str, Any]] = None,
+        accessToken: Optional[str] = None,
+    ) -> Any:
+        return self._request("GET", path, params=params, accessToken=accessToken)
 
-    def post(self, path: str, body: Dict[str, Any]) -> Any:
-        return self._request("POST", path, body=body)
+    def post(
+        self, path: str, body: Dict[str, Any], accessToken: Optional[str] = None
+    ) -> Any:
+        return self._request("POST", path, body=body, accessToken=accessToken)
 
-    def put(self, path: str, body: Dict[str, Any]) -> Any:
-        return self._request("PUT", path, body=body)
+    def put(
+        self, path: str, body: Dict[str, Any], accessToken: Optional[str] = None
+    ) -> Any:
+        return self._request("PUT", path, body=body, accessToken=accessToken)
 
-    def delete(self, path: str) -> Any:
-        return self._request("DELETE", path)
+    def delete(self, path: str, accessToken: Optional[str] = None) -> Any:
+        return self._request("DELETE", path, accessToken=accessToken)
 
     # ------------------------------------------------------------------ #
     def _request(
@@ -48,13 +67,19 @@ class ApiClient:
         path: str,
         params: Optional[Dict[str, Any]] = None,
         body: Optional[Dict[str, Any]] = None,
+        accessToken: Optional[str] = None,
     ) -> Any:
+        token = accessToken or (
+            self._accessTokenProvider() if self._accessTokenProvider else None
+        )
+        headers = {"Authorization": f"Bearer {token}"} if token else None
         try:
             response = self._session.request(
                 method,
                 f"{self._baseUrl}{path}",
                 params=params,
                 json=body,
+                headers=headers,
                 timeout=self._timeout,
             )
         except requests.exceptions.RequestException as error:

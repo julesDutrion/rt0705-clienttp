@@ -1,0 +1,24 @@
+{% extends "components/base.html" %}
+{% block title %}Mon compte{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Espace personnel</p>
+    <h1>Mon compte</h1>
+  </div>
+</div>
+<form class="form-card" method="post" data-password-confirmation>
+  <p><label>Login <input name="login" value="{{ user.login }}" autocomplete="username" required></label></p>
+  <p><label>Adresse e-mail <input type="email" name="email" value="{{ user.email }}" autocomplete="email" required></label></p>
+  <p><label>Date de naissance <input type="date" name="birthDate" value="{{ user.birthDate }}" required></label></p>
+  <p><label>Nouveau mot de passe <input type="password" name="password" autocomplete="new-password" data-password></label></p>
+  <p><label>Confirmer le nouveau mot de passe <input type="password" name="confirmPassword" autocomplete="new-password" data-confirm-password></label></p>
+  <p class="form-hint">Laissez les deux champs vides pour conserver le mot de passe. Un nouveau mot de passe doit contenir au moins 12 caractères avec une minuscule, une majuscule, un chiffre et un symbole.</p>
+  <p>Rôle : {{ user.role }}</p>
+  <div class="form-actions">
+    <button class="button primary" type="submit">Enregistrer</button>
+    <a class="button ghost" href="{{ url_for('films.getFilms') }}">Annuler</a>
+  </div>
+</form>
+<script src="{{ url_for('static', filename='account-form.js') }}" defer></script>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "components/base.html" %}
+{% block title %}Créer un compte{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Bienvenue</p>
+    <h1>Créer un compte</h1>
+  </div>
+</div>
+<form class="form-card" method="post" data-password-confirmation>
+  <p><label>Login <input name="login" value="{{ values.get('login', '') }}" autocomplete="username" required></label></p>
+  <p><label>Adresse e-mail <input type="email" name="email" value="{{ values.get('email', '') }}" autocomplete="email" required></label></p>
+  <p><label>Date de naissance <input type="date" name="birthDate" value="{{ values.get('birthDate', '') }}" required></label></p>
+  <p><label>Mot de passe <input type="password" name="password" autocomplete="new-password" data-password required></label></p>
+  <p><label>Confirmer le mot de passe <input type="password" name="confirmPassword" autocomplete="new-password" data-confirm-password required></label></p>
+  <p class="form-hint">Au moins 12 caractères avec une minuscule, une majuscule, un chiffre et un symbole.</p>
+  <div class="form-actions">
+    <button class="button primary" type="submit">Créer mon compte</button>
+    <a class="button ghost" href="{{ url_for('account.login') }}">Déjà inscrit ? Se connecter</a>
+  </div>
+</form>
+<script src="{{ url_for('static', filename='account-form.js') }}" defer></script>
+{% endblock %}

@@ -6,35 +6,31 @@ les clés JSON de l'API correspondent exactement au modèle.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, fields, is_dataclass
-from datetime import date
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from typing import Any, Dict, Optional
 
 from .BaseDTO import BaseDTO
-from .RoleDTO import RoleDTO
-
 
 
 @dataclass
 class UserDTO(BaseDTO):
-    role: RoleDTO
-    userName: str
+    role: str
+    login: str
     email: str
-    passwordHash: str
-    age: int
+    birthDate: str
+    age: Optional[int] = None
+    idUser: Optional[int] = None
 
     @classmethod
     def fromDict(cls, data: Dict[str, Any]) -> "UserDTO":
         return cls(
-            role=RoleDTO.fromDict(data["role"]),
-            userName=data["userName"],
+            role=data["role"],
+            login=data["login"],
             email=data["email"],
-            passwordHash=data["passwordHash"],
-            age=data["age"],
+            birthDate=data["birthDate"],
+            age=data.get("age"),
+            idUser=data.get("idUser"),
         )
 
     def toPublicDict(self) -> Dict[str, Any]:
-        """Version à renvoyer au client : sans le hash du mot de passe."""
-        data = self.toDict()
-        data.pop("passwordHash", None)
-        return data
+        return self.toDict()

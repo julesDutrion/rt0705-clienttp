@@ -1,0 +1,18 @@
+{% extends "components/base.html" %}
+{% block title %}Connexion{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Espace personnel</p>
+    <h1>Connexion</h1>
+  </div>
+</div>
+<form class="form-card" method="post">
+  <p><label>Login <input name="login" autocomplete="username" required></label></p>
+  <p><label>Mot de passe <input type="password" name="password" autocomplete="current-password" required></label></p>
+  <div class="form-actions">
+    <button class="button primary" type="submit">Se connecter</button>
+    <a class="button ghost" href="{{ url_for('account.register') }}">Créer un compte</a>
+  </div>
+</form>
+{% endblock %}

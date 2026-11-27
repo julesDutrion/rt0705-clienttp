@@ -8,3 +8,4 @@ from .FilmService import FilmService
 from .ActorService import ActorService
 from .SupportService import SupportService
 from .SupportTypeService import SupportTypeService
+from .UserService import UserService

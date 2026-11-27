@@ -1,0 +1,65 @@
+{% extends "components/base.html" %}
+{% block title %}Gestion des comptes{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Administration</p>
+    <h1>Gestion des comptes</h1>
+  </div>
+</div>
+<form class="user-search" method="get" action="{{ url_for('account.manageRoles') }}">
+  <label for="user-login-search">Rechercher un compte par login</label>
+  <input id="user-login-search" type="search" name="login" value="{{ searchLogin }}" placeholder="Saisir un login ou une partie">
+  <button class="button primary" type="submit">Rechercher</button>
+  {% if searchLogin %}<a class="button ghost" href="{{ url_for('account.manageRoles') }}">Effacer</a>{% endif %}
+</form>
+<div class="table-shell">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Identifiant</th>
+        <th>Login</th>
+        <th>Adresse e-mail</th>
+        <th>Rôle</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+        <tr>
+          <td>{{ user.idUser }}</td>
+          <td>{{ user.login }}{% if user.idUser == currentUserId %} (vous){% endif %}</td>
+          <td>{{ user.email }}</td>
+          {% if user.idUser == currentUserId %}
+            <td>
+              {% for roleValue, roleLabel in roles %}
+                {% if user.role == roleValue %}{{ roleLabel }}{% endif %}
+              {% endfor %}
+            </td>
+            <td>—</td>
+          {% else %}
+            <td>
+              <form method="post" action="{{ url_for('account.updateRole', idUser=user.idUser) }}">
+                <label class="sr-only" for="role-{{ user.idUser }}">Rôle de {{ user.login }}</label>
+                <select id="role-{{ user.idUser }}" name="role" required>
+                  {% for roleValue, roleLabel in roles %}
+                    <option value="{{ roleValue }}" {% if user.role == roleValue %}selected{% endif %}>{{ roleLabel }}</option>
+                  {% endfor %}
+                </select>
+                <button class="button" type="submit">Modifier</button>
+              </form>
+            </td>
+            <td>
+              <form method="post" action="{{ url_for('account.deleteUser', idUser=user.idUser) }}" onsubmit="return confirm('Supprimer ce compte ?');">
+                <button class="danger-link" type="submit">Supprimer</button>
+              </form>
+            </td>
+          {% endif %}
+        </tr>
+      {% else %}
+        <tr><td colspan="5">{% if searchLogin %}Aucun compte ne correspond à ce login.{% else %}Aucun compte utilisateur.{% endif %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,12 +1,14 @@
 """Traduction des exceptions en pages d'erreur."""
 
-from flask import Flask, render_template
+from flask import Flask, flash, redirect, render_template, session, url_for
 from werkzeug.exceptions import HTTPException
 
 from exceptions import (
     AlreadyExistsError,
     ApiError,
     ApiUnavailableError,
+    AuthenticationError,
+    ForbiddenError,
     InvalidReferenceError,
     InvalidRequestError,
     NotFoundError,
@@ -16,6 +18,20 @@ from exceptions import (
 def registerErrorHandlers(app: Flask) -> None:
     def errorPage(code: int, message: str):
         return render_template("errors/error.html", code=code, message=message), code
+
+    @app.errorhandler(AuthenticationError)
+    def handleAuthenticationError(error: AuthenticationError):
+        session.clear()
+        flash("Votre session a expiré. Veuillez vous reconnecter.", "error")
+        return redirect(url_for("account.login"))
+
+    @app.errorhandler(ForbiddenError)
+    def handleForbidden(error: ForbiddenError):
+        return errorPage(403, "Vous n'avez pas les droits nécessaires.")
+
+    @app.errorhandler(403)
+    def handleForbiddenHttp(error):
+        return errorPage(403, "Vous n'avez pas les droits nécessaires.")
 
     @app.errorhandler(NotFoundError)
     def handleNotFound(error: NotFoundError):

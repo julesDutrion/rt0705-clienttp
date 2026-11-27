@@ -1,10 +1,10 @@
 {% extends "components/base.html" %}
-{% block title %}{{ 'Modifier le film' if isEdit else 'Ajouter un film' }}{% endblock %}
+{% block title %}{{ 'Modifier une fiche du catalogue' if isEdit else 'Ajouter au catalogue' }}{% endblock %}
 {% block content %}
 <div class="page-heading">
   <div>
     <p class="eyebrow">{{ 'Modification' if isEdit else 'Nouvelle création' }}</p>
-    <h1>{{ 'Modifier le film' if isEdit else 'Ajouter un film' }}</h1>
+    <h1>{{ 'Modifier une fiche du catalogue' if isEdit else 'Ajouter au catalogue' }}</h1>
   </div>
 </div>
 <form class="form-card" method="post">
