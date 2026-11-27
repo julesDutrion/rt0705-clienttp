@@ -14,12 +14,21 @@ from .BaseDTO import BaseDTO
 
 @dataclass
 class ActorDTO(BaseDTO):
+    """Classe qui représente les données d'un acteur."""
+
     idActor: int
     firstName: str
     lastName: str
 
     @classmethod
     def fromDict(cls, data: Dict[str, Any]) -> "ActorDTO":
+        """
+        Méthode qui construit un acteur à partir d'un dictionnaire.
+
+        :param data: Données de l'acteur.
+        :return: Acteur correspondant.
+        :raises KeyError: Si une donnée obligatoire est absente.
+        """
         return cls(
             idActor=data["idActor"],
             firstName=data["firstName"],

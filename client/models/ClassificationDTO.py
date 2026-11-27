@@ -13,11 +13,20 @@ from .BaseDTO import BaseDTO
 
 @dataclass
 class ClassificationDTO(BaseDTO):
+    """Classe qui représente les données d'une classification."""
+
     idClassification: int
     minAge: int
 
     @classmethod
     def fromDict(cls, data: Dict[str, Any]) -> "ClassificationDTO":
+        """
+        Méthode qui construit une classification à partir d'un dictionnaire.
+
+        :param data: Données de la classification.
+        :return: Classification correspondante.
+        :raises KeyError: Si une donnée obligatoire est absente.
+        """
         return cls(
             idClassification=data["idClassification"],
             minAge=data["minAge"],

@@ -7,10 +7,20 @@ from exceptions import InvalidRequestError
 
 
 class FormParser:
-    """Lecture et validation des champs d'un formulaire HTML (les valeurs arrivent en texte)."""
+    """Classe qui représente le lecteur des champs de formulaire."""
 
     @staticmethod
     def text(form: MultiDict, key: str, label: str, required: bool = False) -> str:
+        """
+        Méthode qui lit une valeur textuelle de formulaire.
+
+        :param form: Champs soumis par le formulaire.
+        :param key: Nom du champ à lire.
+        :param label: Libellé affiché en cas de valeur manquante.
+        :param required: Indique si une valeur est obligatoire.
+        :return: Valeur nettoyée.
+        :raises InvalidRequestError: Si le champ obligatoire est vide.
+        """
         value = (form.get(key) or "").strip()
         if required and not value:
             raise InvalidRequestError(f"Le champ « {label} » est obligatoire.")
@@ -18,6 +28,15 @@ class FormParser:
 
     @staticmethod
     def requiredInteger(form: MultiDict, key: str, label: str) -> int:
+        """
+        Méthode qui lit un entier obligatoire de formulaire.
+
+        :param form: Champs soumis par le formulaire.
+        :param key: Nom du champ à lire.
+        :param label: Libellé affiché en cas d'erreur.
+        :return: Entier saisi.
+        :raises InvalidRequestError: Si la valeur est absente ou invalide.
+        """
         value = FormParser.optionalInteger(form, key, label)
         if value is None:
             raise InvalidRequestError(f"Le champ « {label} » est obligatoire.")
@@ -25,6 +44,15 @@ class FormParser:
 
     @staticmethod
     def optionalInteger(form: MultiDict, key: str, label: str) -> Optional[int]:
+        """
+        Méthode qui lit un entier facultatif de formulaire.
+
+        :param form: Champs soumis par le formulaire.
+        :param key: Nom du champ à lire.
+        :param label: Libellé affiché en cas d'erreur.
+        :return: Entier saisi ou `None` si le champ est vide.
+        :raises InvalidRequestError: Si la valeur n'est pas un entier.
+        """
         raw = (form.get(key) or "").strip()
         if not raw:
             return None
@@ -35,6 +63,15 @@ class FormParser:
 
     @staticmethod
     def requiredDate(form: MultiDict, key: str, label: str) -> date:
+        """
+        Méthode qui lit une date obligatoire de formulaire.
+
+        :param form: Champs soumis par le formulaire.
+        :param key: Nom du champ à lire.
+        :param label: Libellé affiché en cas d'erreur.
+        :return: Date saisie.
+        :raises InvalidRequestError: Si la valeur est absente ou invalide.
+        """
         raw = FormParser.text(form, key, label, required=True)
         try:
             return date.fromisoformat(raw)
@@ -43,6 +80,15 @@ class FormParser:
 
     @staticmethod
     def integerList(form: MultiDict, key: str, label: str) -> List[int]:
+        """
+        Méthode qui lit une liste d'entiers de formulaire.
+
+        :param form: Champs soumis par le formulaire.
+        :param key: Nom des champs répétés à lire.
+        :param label: Libellé affiché en cas d'erreur.
+        :return: Entiers saisis sans doublons.
+        :raises InvalidRequestError: Si une valeur n'est pas un entier.
+        """
         values: List[int] = []
         for raw in form.getlist(key):
             try:

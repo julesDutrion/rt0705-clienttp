@@ -16,10 +16,22 @@ _FIELDS = [
 
 
 def createLanguageBlueprint(languageService: LanguageService) -> Blueprint:
+    """
+    Méthode qui crée les routes des langues.
+
+    :param languageService: Service de gestion des langues.
+    :return: Blueprint Flask des langues.
+    """
     blueprint = Blueprint("languages", __name__, url_prefix="/languages")
 
     @blueprint.get("/search")
     def searchLanguages():
+        """
+        Méthode qui recherche les langues pour le sélecteur de formulaire.
+
+        :return: Réponse JSON des langues correspondantes.
+        :raises ClientError: Si l'appel API échoue.
+        """
         name = (request.args.get("q") or "").strip()
         if not name:
             return jsonify([])
@@ -35,6 +47,12 @@ def createLanguageBlueprint(languageService: LanguageService) -> Blueprint:
 
     @blueprint.get("")
     def getLanguages():
+        """
+        Méthode qui affiche la liste des langues.
+
+        :return: Page HTML des langues.
+        :raises ClientError: Si l'appel API échoue.
+        """
         return render_template(
             "reference/list.html",
             title="Langues",
@@ -47,6 +65,12 @@ def createLanguageBlueprint(languageService: LanguageService) -> Blueprint:
 
     @blueprint.route("/new", methods=["GET", "POST"])
     def newLanguage():
+        """
+        Méthode qui affiche ou traite la création d'une langue.
+
+        :return: Formulaire HTML ou redirection après création.
+        :raises ClientError: Si un appel API échoue.
+        """
         values = None
         redirectTo = None
         if request.method == "POST":
@@ -72,6 +96,13 @@ def createLanguageBlueprint(languageService: LanguageService) -> Blueprint:
 
     @blueprint.route("/<int:idLanguage>/edit", methods=["GET", "POST"])
     def editLanguage(idLanguage: int):
+        """
+        Méthode qui affiche ou traite la modification d'une langue.
+
+        :param idLanguage: Identifiant de la langue.
+        :return: Formulaire HTML ou redirection après modification.
+        :raises ClientError: Si un appel API échoue.
+        """
         existing = languageService.getLanguageById(idLanguage)
         values = existing
         redirectTo = None
@@ -98,6 +129,13 @@ def createLanguageBlueprint(languageService: LanguageService) -> Blueprint:
 
     @blueprint.post("/<int:idLanguage>/delete")
     def deleteLanguage(idLanguage: int):
+        """
+        Méthode qui supprime une langue.
+
+        :param idLanguage: Identifiant de la langue.
+        :return: Redirection vers la liste des langues.
+        :raises ClientError: Si l'appel API échoue.
+        """
         languageService.deleteLanguage(idLanguage)
         flash("Langue supprimée.", "success")
         return redirect(url_for("languages.getLanguages"))

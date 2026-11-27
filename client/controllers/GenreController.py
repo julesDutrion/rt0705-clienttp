@@ -14,10 +14,22 @@ _FIELDS = [
 
 
 def createGenreBlueprint(genreService: GenreService) -> Blueprint:
+    """
+    Méthode qui crée les routes des genres.
+
+    :param genreService: Service de gestion des genres.
+    :return: Blueprint Flask des genres.
+    """
     blueprint = Blueprint("genres", __name__, url_prefix="/genres")
 
     @blueprint.get("")
     def getGenres():
+        """
+        Méthode qui affiche la liste des genres.
+
+        :return: Page HTML des genres.
+        :raises ClientError: Si l'appel API échoue.
+        """
         return render_template(
             "reference/list.html",
             title="Genres",
@@ -30,6 +42,12 @@ def createGenreBlueprint(genreService: GenreService) -> Blueprint:
 
     @blueprint.route("/new", methods=["GET", "POST"])
     def newGenre():
+        """
+        Méthode qui affiche ou traite la création d'un genre.
+
+        :return: Formulaire HTML ou redirection après création.
+        :raises ClientError: Si un appel API échoue.
+        """
         values = None
         redirectTo = None
         if request.method == "POST":
@@ -56,6 +74,13 @@ def createGenreBlueprint(genreService: GenreService) -> Blueprint:
 
     @blueprint.route("/<int:idGenre>/edit", methods=["GET", "POST"])
     def editGenre(idGenre: int):
+        """
+        Méthode qui affiche ou traite la modification d'un genre.
+
+        :param idGenre: Identifiant du genre.
+        :return: Formulaire HTML ou redirection après modification.
+        :raises ClientError: Si un appel API échoue.
+        """
         existing = genreService.getGenreById(idGenre)
         values = existing
         redirectTo = None
@@ -82,6 +107,13 @@ def createGenreBlueprint(genreService: GenreService) -> Blueprint:
 
     @blueprint.post("/<int:idGenre>/delete")
     def deleteGenre(idGenre: int):
+        """
+        Méthode qui supprime un genre.
+
+        :param idGenre: Identifiant du genre.
+        :return: Redirection vers la liste des genres.
+        :raises ClientError: Si l'appel API échoue.
+        """
         genreService.deleteGenre(idGenre)
         flash("Genre supprimé.", "success")
         return redirect(url_for("genres.getGenres"))

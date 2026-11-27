@@ -52,11 +52,21 @@ MANAGEMENT_PAGE_ENDPOINTS = {
 
 
 def createApp() -> Flask:
+    """
+    Méthode qui crée et configure l'application Flask du client.
+
+    :return: Application Flask configurée.
+    """
     app = Flask(__name__, template_folder="view/templates", static_folder="view/static")
     app.config["SECRET_KEY"] = SECRET_KEY
 
     # Services : ils parlent à l'API via un unique ApiClient
     def currentAccessToken():
+        """
+        Méthode qui récupère le jeton de la session courante.
+
+        :return: Jeton JWT ou `None` hors requête.
+        """
         return session.get("accessToken") if has_request_context() else None
 
     apiClient = ApiClient(
@@ -104,10 +114,20 @@ def createApp() -> Flask:
 
     @app.get("/")
     def index():
+        """
+        Méthode qui redirige vers le catalogue.
+
+        :return: Redirection vers la liste des films.
+        """
         return redirect(url_for("films.getFilms"))
 
     @app.before_request
     def restrictManagementAccess():
+        """
+        Méthode qui vérifie l'accès aux pages de gestion.
+
+        :return: Redirection si la connexion manque, sinon `None`.
+        """
         endpoint = request.endpoint or ""
         routeName = endpoint.rsplit(".", 1)[-1]
         isWriteRoute = routeName.startswith(("new", "edit", "delete"))
@@ -121,6 +141,11 @@ def createApp() -> Flask:
 
     @app.context_processor
     def accountContext():
+        """
+        Méthode qui expose le compte et ses permissions aux templates.
+
+        :return: Variables de contexte du compte connecté.
+        """
         user = session.get("user")
         role = user.get("role") if user else None
         return {

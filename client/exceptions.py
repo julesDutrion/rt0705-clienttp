@@ -1,37 +1,37 @@
 class ClientError(Exception):
-    pass
+    """Classe qui représente une erreur applicative du client."""
 
 
 class ApiError(ClientError):
-    pass
+    """Classe qui représente une erreur de réponse de l'API."""
 
 
 class ApiUnavailableError(ApiError):
-    pass
+    """Classe qui représente une indisponibilité de l'API."""
 
 
 class AuthenticationError(ClientError):
-    pass
+    """Classe qui représente une erreur d'authentification."""
 
 
 class ForbiddenError(ClientError):
-    pass
+    """Classe qui représente un refus d'autorisation."""
 
 
 class InvalidRequestError(ClientError):
-    pass
+    """Classe qui représente une requête invalide."""
 
 
 class InvalidReferenceError(ClientError):
-    pass
+    """Classe qui représente une référence API invalide."""
 
 
 class AlreadyExistsError(ClientError):
-    pass
+    """Classe qui représente un conflit avec une ressource existante."""
 
 
 class NotFoundError(ClientError):
-    pass
+    """Classe qui représente une ressource introuvable."""
 
 
 USER_INPUT_ERRORS = (

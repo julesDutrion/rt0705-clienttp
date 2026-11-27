@@ -26,6 +26,13 @@ ADMIN_ROLE = "adminstrateur"
 def _loginRequired(function: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(function)
     def wrapper(*args: Any, **kwargs: Any):
+        """
+        Méthode qui vérifie la présence d'une session utilisateur.
+
+        :param args: Arguments de la route protégée.
+        :param kwargs: Arguments nommés de la route protégée.
+        :return: Réponse de la route ou redirection vers la connexion.
+        """
         if not session.get("accessToken") or not session.get("user"):
             flash("Connectez-vous pour accéder à cette page.", "error")
             return redirect(url_for("account.login"))
@@ -38,6 +45,14 @@ def _adminRequired(function: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(function)
     @_loginRequired
     def wrapper(*args: Any, **kwargs: Any):
+        """
+        Méthode qui vérifie le rôle administrateur.
+
+        :param args: Arguments de la route protégée.
+        :param kwargs: Arguments nommés de la route protégée.
+        :return: Réponse de la route protégée.
+        :raises HTTPException: Si le compte n'est pas administrateur.
+        """
         if session["user"].get("role") != ADMIN_ROLE:
             abort(403)
         return function(*args, **kwargs)
@@ -46,10 +61,22 @@ def _adminRequired(function: Callable[..., Any]) -> Callable[..., Any]:
 
 
 def createAccountBlueprint(userService: UserService) -> Blueprint:
+    """
+    Méthode qui crée les routes des comptes utilisateurs.
+
+    :param userService: Service de gestion des utilisateurs.
+    :return: Blueprint Flask des comptes.
+    """
     blueprint = Blueprint("account", __name__, url_prefix="/account")
 
     @blueprint.route("/register", methods=["GET", "POST"])
     def register():
+        """
+        Méthode qui affiche ou traite l'inscription d'un compte.
+
+        :return: Page d'inscription ou redirection vers la connexion.
+        :raises ClientError: Si un appel API non géré échoue.
+        """
         values: Dict[str, str] = {}
         if request.method == "POST":
             values = request.form.to_dict()
@@ -75,6 +102,12 @@ def createAccountBlueprint(userService: UserService) -> Blueprint:
 
     @blueprint.route("/login", methods=["GET", "POST"])
     def login():
+        """
+        Méthode qui affiche ou traite la connexion d'un utilisateur.
+
+        :return: Page de connexion ou redirection vers le catalogue.
+        :raises ClientError: Si un appel API non géré échoue.
+        """
         if request.method == "POST":
             try:
                 user, accessToken = userService.login(
@@ -94,6 +127,11 @@ def createAccountBlueprint(userService: UserService) -> Blueprint:
 
     @blueprint.post("/logout")
     def logout():
+        """
+        Méthode qui termine la session de l'utilisateur.
+
+        :return: Redirection vers le catalogue.
+        """
         session.clear()
         flash("Vous êtes déconnecté.", "success")
         return redirect(url_for("films.getFilms"))
@@ -101,6 +139,12 @@ def createAccountBlueprint(userService: UserService) -> Blueprint:
     @blueprint.route("/profile", methods=["GET", "POST"])
     @_loginRequired
     def profile():
+        """
+        Méthode qui affiche ou modifie le compte connecté.
+
+        :return: Page du compte ou redirection après modification.
+        :raises ClientError: Si un appel API non géré échoue.
+        """
         userId = session["user"]["idUser"]
         accessToken = session["accessToken"]
         user = userService.getUser(userId, accessToken)
@@ -133,6 +177,12 @@ def createAccountBlueprint(userService: UserService) -> Blueprint:
     @blueprint.get("/admin/roles")
     @_adminRequired
     def manageRoles():
+        """
+        Méthode qui affiche les comptes et leurs rôles pour l'administrateur.
+
+        :return: Page de gestion des comptes.
+        :raises ClientError: Si un appel API échoue.
+        """
         searchLogin = request.args.get("login", "").strip()
         users = userService.getAllUsers(session["accessToken"])
         if searchLogin:
@@ -151,6 +201,13 @@ def createAccountBlueprint(userService: UserService) -> Blueprint:
     @blueprint.post("/admin/users/<int:idUser>/role")
     @_adminRequired
     def updateRole(idUser: int):
+        """
+        Méthode qui modifie le rôle d'un compte.
+
+        :param idUser: Identifiant du compte à modifier.
+        :return: Redirection vers la gestion des comptes.
+        :raises ClientError: Si un appel API échoue.
+        """
         role = request.form.get("role", "")
         if idUser == session["user"]["idUser"]:
             flash("Vous ne pouvez pas modifier votre propre rôle.", "error")
@@ -169,6 +226,13 @@ def createAccountBlueprint(userService: UserService) -> Blueprint:
     @blueprint.post("/admin/users/<int:idUser>/delete")
     @_adminRequired
     def deleteUser(idUser: int):
+        """
+        Méthode qui supprime un compte utilisateur.
+
+        :param idUser: Identifiant du compte à supprimer.
+        :return: Redirection vers la gestion des comptes.
+        :raises ClientError: Si l'appel API échoue.
+        """
         if idUser == session["user"]["idUser"]:
             flash("Vous ne pouvez pas supprimer votre propre compte ici.", "error")
         else:

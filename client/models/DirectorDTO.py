@@ -13,12 +13,21 @@ from .BaseDTO import BaseDTO
 
 @dataclass
 class DirectorDTO(BaseDTO):
+    """Classe qui représente les données d'un réalisateur."""
+
     idDirector: int
     lastName: str
     firstName: str
 
     @classmethod
     def fromDict(cls, data: Dict[str, Any]) -> "DirectorDTO":
+        """
+        Méthode qui construit un réalisateur à partir d'un dictionnaire.
+
+        :param data: Données du réalisateur.
+        :return: Réalisateur correspondant.
+        :raises KeyError: Si une donnée obligatoire est absente.
+        """
         return cls(
             idDirector=data["idDirector"],
             lastName=data["lastName"],

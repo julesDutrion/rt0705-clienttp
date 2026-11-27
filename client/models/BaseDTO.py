@@ -10,9 +10,14 @@ from dataclasses import dataclass, field, fields, is_dataclass
 from datetime import date
 from typing import Any, Dict, List, Optional
 class BaseDTO:
-    """Fournit la sérialisation commune (dict / JSON / MongoDB)."""
+    """Classe qui représente la base commune des objets de transfert."""
 
     def toDict(self) -> Dict[str, Any]:
+        """
+        Méthode qui convertit l'objet en dictionnaire.
+
+        :return: Dictionnaire représentant l'objet.
+        """
         result: Dict[str, Any] = {}
         for f in fields(self):  # type: ignore[arg-type]
             value = getattr(self, f.name)

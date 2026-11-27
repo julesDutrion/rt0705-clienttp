@@ -14,10 +14,22 @@ _FIELDS = [
 
 
 def createClassificationBlueprint(classificationService: ClassificationService) -> Blueprint:
+    """
+    Méthode qui crée les routes des classifications.
+
+    :param classificationService: Service de gestion des classifications.
+    :return: Blueprint Flask des classifications.
+    """
     blueprint = Blueprint("classifications", __name__, url_prefix="/classifications")
 
     @blueprint.get("")
     def getClassifications():
+        """
+        Méthode qui affiche la liste des classifications.
+
+        :return: Page HTML des classifications.
+        :raises ClientError: Si l'appel API échoue.
+        """
         # L'API ne permet pas de filtrer les films par classification : pas de lien « Voir les films ».
         return render_template(
             "reference/list.html",
@@ -30,6 +42,12 @@ def createClassificationBlueprint(classificationService: ClassificationService) 
 
     @blueprint.route("/new", methods=["GET", "POST"])
     def newClassification():
+        """
+        Méthode qui affiche ou traite la création d'une classification.
+
+        :return: Formulaire HTML ou redirection après création.
+        :raises ClientError: Si un appel API échoue.
+        """
         values = None
         redirectTo = None
         if request.method == "POST":
@@ -56,6 +74,13 @@ def createClassificationBlueprint(classificationService: ClassificationService) 
 
     @blueprint.route("/<int:idClassification>/edit", methods=["GET", "POST"])
     def editClassification(idClassification: int):
+        """
+        Méthode qui affiche ou traite la modification d'une classification.
+
+        :param idClassification: Identifiant de la classification.
+        :return: Formulaire HTML ou redirection après modification.
+        :raises ClientError: Si un appel API échoue.
+        """
         existing = classificationService.getClassificationById(idClassification)
         values = existing
         redirectTo = None
@@ -82,6 +107,13 @@ def createClassificationBlueprint(classificationService: ClassificationService) 
 
     @blueprint.post("/<int:idClassification>/delete")
     def deleteClassification(idClassification: int):
+        """
+        Méthode qui supprime une classification.
+
+        :param idClassification: Identifiant de la classification.
+        :return: Redirection vers la liste des classifications.
+        :raises ClientError: Si l'appel API échoue.
+        """
         classificationService.deleteClassification(idClassification)
         flash("Classification supprimée.", "success")
         return redirect(url_for("classifications.getClassifications"))

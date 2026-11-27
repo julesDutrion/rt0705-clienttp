@@ -1,0 +1,13 @@
+tests/
+**/tests/
+**/test_*.py
+**/*_test.py
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+**/.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/

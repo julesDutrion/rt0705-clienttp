@@ -14,6 +14,8 @@ from .BaseDTO import BaseDTO
 
 @dataclass
 class UserDTO(BaseDTO):
+    """Classe qui représente les données publiques d'un utilisateur."""
+
     role: str
     login: str
     email: str
@@ -23,6 +25,13 @@ class UserDTO(BaseDTO):
 
     @classmethod
     def fromDict(cls, data: Dict[str, Any]) -> "UserDTO":
+        """
+        Méthode qui construit un utilisateur à partir d'un dictionnaire.
+
+        :param data: Données de l'utilisateur.
+        :return: Utilisateur correspondant.
+        :raises KeyError: Si une donnée obligatoire est absente.
+        """
         return cls(
             role=data["role"],
             login=data["login"],
@@ -33,4 +42,9 @@ class UserDTO(BaseDTO):
         )
 
     def toPublicDict(self) -> Dict[str, Any]:
+        """
+        Méthode qui retourne les données publiques de l'utilisateur.
+
+        :return: Dictionnaire des informations publiques.
+        """
         return self.toDict()

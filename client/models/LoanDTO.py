@@ -8,6 +8,8 @@ from .SupportTypeDTO import SupportTypeDTO
 
 @dataclass
 class LoanDTO(BaseDTO):
+    """Classe qui représente les données d'un emprunt."""
+
     idLoan: int
     idUser: int
     idPhysicalSupport: int
@@ -20,7 +22,22 @@ class LoanDTO(BaseDTO):
 
     @classmethod
     def fromDict(cls, data: Dict[str, Any]) -> "LoanDTO":
+        """
+        Méthode qui construit un emprunt à partir d'un dictionnaire.
+
+        :param data: Données de l'emprunt.
+        :return: Emprunt correspondant.
+        :raises KeyError: Si une donnée obligatoire est absente.
+        :raises ValueError: Si une date ne respecte pas le format ISO.
+        """
         def parseDate(value: Any) -> date:
+            """
+            Méthode qui convertit une valeur en date.
+
+            :param value: Valeur de date reçue de l'API.
+            :return: Date correspondante.
+            :raises ValueError: Si la valeur n'est pas une date valide.
+            """
             if isinstance(value, datetime):
                 return value.date()
             if isinstance(value, date):
@@ -48,8 +65,18 @@ class LoanDTO(BaseDTO):
 
     @property
     def isReturned(self) -> bool:
+        """
+        Méthode qui indique si l'emprunt a été retourné.
+
+        :return: `True` si une date de retour effective est définie.
+        """
         return self.actualReturnDate is not None
 
     @property
     def isOverdue(self) -> bool:
+        """
+        Méthode qui indique si l'emprunt est en retard.
+
+        :return: `True` si l'emprunt actif porte l'état « OVERDUE ».
+        """
         return not self.isReturned and self.status == "OVERDUE"

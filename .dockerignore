@@ -3,3 +3,12 @@
 .git/
 __pycache__/
 *.pyc
+**/tests/
+**/test_*.py
+**/*_test.py
+.pytest_cache/
+**/.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/

@@ -20,6 +20,8 @@ from .LanguageDTO import LanguageDTO
 
 @dataclass
 class FilmDTO(BaseDTO):
+    """Classe qui représente les données d'un film."""
+
     idFilm: str
     title: str
     synopsis: str
@@ -39,6 +41,14 @@ class FilmDTO(BaseDTO):
 
     @classmethod
     def fromDict(cls, data: Dict[str, Any]) -> "FilmDTO":
+        """
+        Méthode qui construit un film à partir d'un dictionnaire.
+
+        :param data: Données du film.
+        :return: Film correspondant.
+        :raises KeyError: Si une donnée obligatoire est absente.
+        :raises ValueError: Si une date ne respecte pas le format ISO.
+        """
         def _date(value: Any) -> date:
             return value if isinstance(value, date) else date.fromisoformat(value)
 

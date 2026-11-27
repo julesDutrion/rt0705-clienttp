@@ -16,10 +16,22 @@ _FIELDS = [
 
 
 def createActorBlueprint(actorService: ActorService) -> Blueprint:
+    """
+    Méthode qui crée les routes des acteurs.
+
+    :param actorService: Service de gestion des acteurs.
+    :return: Blueprint Flask des acteurs.
+    """
     blueprint = Blueprint("actors", __name__, url_prefix="/actors")
 
     @blueprint.get("/search")
     def searchActors():
+        """
+        Méthode qui recherche les acteurs pour le sélecteur de formulaire.
+
+        :return: Réponse JSON des acteurs correspondants.
+        :raises ClientError: Si l'appel API échoue.
+        """
         query = (request.args.get("q") or "").strip()
         if not query:
             return jsonify([])
@@ -33,6 +45,12 @@ def createActorBlueprint(actorService: ActorService) -> Blueprint:
 
     @blueprint.get("")
     def getActors():
+        """
+        Méthode qui affiche la liste des acteurs.
+
+        :return: Page HTML des acteurs.
+        :raises ClientError: Si l'appel API échoue.
+        """
         return render_template(
             "reference/list.html",
             title="Acteurs",
@@ -45,6 +63,12 @@ def createActorBlueprint(actorService: ActorService) -> Blueprint:
 
     @blueprint.route("/new", methods=["GET", "POST"])
     def newActor():
+        """
+        Méthode qui affiche ou traite la création d'un acteur.
+
+        :return: Formulaire HTML ou redirection après création.
+        :raises ClientError: Si un appel API échoue.
+        """
         values = None
         redirectTo = None
         if request.method == "POST":
@@ -70,6 +94,13 @@ def createActorBlueprint(actorService: ActorService) -> Blueprint:
 
     @blueprint.route("/<int:idActor>/edit", methods=["GET", "POST"])
     def editActor(idActor: int):
+        """
+        Méthode qui affiche ou traite la modification d'un acteur.
+
+        :param idActor: Identifiant de l'acteur.
+        :return: Formulaire HTML ou redirection après modification.
+        :raises ClientError: Si un appel API échoue.
+        """
         existing = actorService.getActorById(idActor)
         values = existing
         redirectTo = None
@@ -96,6 +127,13 @@ def createActorBlueprint(actorService: ActorService) -> Blueprint:
 
     @blueprint.post("/<int:idActor>/delete")
     def deleteActor(idActor: int):
+        """
+        Méthode qui supprime un acteur.
+
+        :param idActor: Identifiant de l'acteur.
+        :return: Redirection vers la liste des acteurs.
+        :raises ClientError: Si l'appel API échoue.
+        """
         actorService.deleteActor(idActor)
         flash("Acteur supprimé.", "success")
         return redirect(url_for("actors.getActors"))

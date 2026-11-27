@@ -14,6 +14,8 @@ from .SupportTypeDTO import SupportTypeDTO
 
 @dataclass
 class SupportDTO(BaseDTO):
+    """Classe qui représente les données d'un support de film."""
+
     idFilm: str
     idSupportType: int
     idSupport: Optional[int] = None
@@ -24,6 +26,13 @@ class SupportDTO(BaseDTO):
 
     @classmethod
     def fromDict(cls, data: Dict[str, Any]) -> "SupportDTO":
+        """
+        Méthode qui construit un support à partir d'un dictionnaire.
+
+        :param data: Données du support.
+        :return: Support correspondant.
+        :raises KeyError: Si une donnée obligatoire est absente.
+        """
         return cls(
             idSupport=data.get("idSupport"),
             idFilm=data["idFilm"],

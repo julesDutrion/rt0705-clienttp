@@ -26,7 +26,7 @@ _STATUS_TO_ERROR: Dict[int, type] = {
 
 
 class ApiClient:
-    """Transport HTTP vers l'API : seul endroit qui connaît `requests` et les codes de retour."""
+    """Classe qui représente le transport HTTP vers l'API."""
 
     def __init__(
         self,
@@ -45,16 +45,46 @@ class ApiClient:
         params: Optional[Dict[str, Any]] = None,
         accessToken: Optional[str] = None,
     ) -> Any:
+        """
+        Méthode qui envoie une requête GET à l'API.
+
+        :param path: Chemin de la ressource API.
+        :param params: Paramètres de requête facultatifs.
+        :param accessToken: Jeton Bearer facultatif.
+        :return: Corps JSON de la réponse, ou `None` si vide.
+        :raises ClientError: Si l'API renvoie une erreur.
+        :raises ApiUnavailableError: Si l'API ne répond pas.
+        """
         return self._request("GET", path, params=params, accessToken=accessToken)
 
     def post(
         self, path: str, body: Dict[str, Any], accessToken: Optional[str] = None
     ) -> Any:
+        """
+        Méthode qui envoie une requête POST à l'API.
+
+        :param path: Chemin de la ressource API.
+        :param body: Corps JSON de la requête.
+        :param accessToken: Jeton Bearer facultatif.
+        :return: Corps JSON de la réponse, ou `None` si vide.
+        :raises ClientError: Si l'API renvoie une erreur.
+        :raises ApiUnavailableError: Si l'API ne répond pas.
+        """
         return self._request("POST", path, body=body, accessToken=accessToken)
 
     def put(
         self, path: str, body: Dict[str, Any], accessToken: Optional[str] = None
     ) -> Any:
+        """
+        Méthode qui envoie une requête PUT à l'API.
+
+        :param path: Chemin de la ressource API.
+        :param body: Corps JSON de la requête.
+        :param accessToken: Jeton Bearer facultatif.
+        :return: Corps JSON de la réponse, ou `None` si vide.
+        :raises ClientError: Si l'API renvoie une erreur.
+        :raises ApiUnavailableError: Si l'API ne répond pas.
+        """
         return self._request("PUT", path, body=body, accessToken=accessToken)
 
     def patch(
@@ -63,9 +93,28 @@ class ApiClient:
         body: Optional[Dict[str, Any]] = None,
         accessToken: Optional[str] = None,
     ) -> Any:
+        """
+        Méthode qui envoie une requête PATCH à l'API.
+
+        :param path: Chemin de la ressource API.
+        :param body: Corps JSON facultatif de la requête.
+        :param accessToken: Jeton Bearer facultatif.
+        :return: Corps JSON de la réponse, ou `None` si vide.
+        :raises ClientError: Si l'API renvoie une erreur.
+        :raises ApiUnavailableError: Si l'API ne répond pas.
+        """
         return self._request("PATCH", path, body=body, accessToken=accessToken)
 
     def delete(self, path: str, accessToken: Optional[str] = None) -> Any:
+        """
+        Méthode qui envoie une requête DELETE à l'API.
+
+        :param path: Chemin de la ressource API.
+        :param accessToken: Jeton Bearer facultatif.
+        :return: Corps JSON de la réponse, ou `None` si vide.
+        :raises ClientError: Si l'API renvoie une erreur.
+        :raises ApiUnavailableError: Si l'API ne répond pas.
+        """
         return self._request("DELETE", path, accessToken=accessToken)
 
     # ------------------------------------------------------------------ #

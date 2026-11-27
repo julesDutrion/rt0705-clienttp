@@ -9,9 +9,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copie du client
 COPY . .
 
-# Dans le conteneur, le serveur doit écouter sur toutes les interfaces
-ENV CLIENT_HOST=0.0.0.0
-
 EXPOSE 5001
 
-CMD ["python", "app.py"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5001", "app:createApp()"]

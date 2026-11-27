@@ -23,6 +23,8 @@ from .SupportTypeService import SupportTypeService
 
 
 class FilmService:
+    """Classe qui représente le service de gestion des films."""
+
     def __init__(
         self,
         apiClient: ApiClient,
@@ -51,7 +53,18 @@ class FilmService:
         idActor: Optional[int] = None,
         idSupportType: Optional[int] = None,
     ) -> List[FilmDTO]:
-        """Sans critère : tout le catalogue. Les critères se cumulent (ET), comme côté API."""
+        """
+        Méthode qui recherche les films selon les critères fournis.
+
+        :param title: Titre ou partie du titre recherché.
+        :param idGenre: Identifiant du genre recherché.
+        :param idDirector: Identifiant du réalisateur recherché.
+        :param idLanguage: Identifiant de la langue recherchée.
+        :param idActor: Identifiant de l'acteur recherché.
+        :param idSupportType: Identifiant du type de support recherché.
+        :return: Films correspondant aux critères.
+        :raises ClientError: Si l'appel API échoue.
+        """
         params: Dict[str, Any] = {}
         if title:
             params["title"] = title
@@ -69,6 +82,13 @@ class FilmService:
         return [FilmDTO.fromDict(item) for item in data]
 
     def getFilmById(self, idFilm: str) -> FilmDTO:
+        """
+        Méthode qui récupère un film et ses supports par identifiant.
+
+        :param idFilm: Identifiant du film.
+        :return: Film correspondant avec ses supports.
+        :raises ClientError: Si le film ou un support est introuvable.
+        """
         film = FilmDTO.fromDict(
             self._apiClient.get(f"/films/{quote(idFilm, safe='')}")
         )
@@ -76,6 +96,13 @@ class FilmService:
         return film
 
     def getFilmTitleById(self, idFilm: str) -> str:
+        """
+        Méthode qui récupère le titre d'un film.
+
+        :param idFilm: Identifiant du film.
+        :return: Titre du film.
+        :raises ClientError: Si l'appel API échoue.
+        """
         data = self._apiClient.get(f"/films/{quote(idFilm, safe='')}")
         return FilmDTO.fromDict(data).title
 
@@ -83,6 +110,13 @@ class FilmService:
     # Écriture
     # ------------------------------------------------------------------ #
     def createFilmFromForm(self, form: MultiDict) -> Optional[FilmDTO]:
+        """
+        Méthode qui crée un film à partir d'un formulaire.
+
+        :param form: Champs soumis par le formulaire.
+        :return: Film créé, ou `None` si l'API ne le retourne pas.
+        :raises ClientError: Si les données ou un appel API sont invalides.
+        """
         supports = (
             self._buildSupports(form, "", [])
             if form.get("supportsSubmitted") == "1"
@@ -107,7 +141,14 @@ class FilmService:
         return created
 
     def updateFilmFromForm(self, existingFilm: FilmDTO, form: MultiDict) -> FilmDTO:
-        """Met à jour les informations du film et, si soumis, ses supports."""
+        """
+        Méthode qui modifie un film et ses supports soumis.
+
+        :param existingFilm: Film à modifier.
+        :param form: Champs soumis par le formulaire.
+        :return: Film modifié.
+        :raises ClientError: Si les données ou un appel API sont invalides.
+        """
         supportsSubmitted = form.get("supportsSubmitted") == "1"
         supports = (
             self._buildSupports(form, existingFilm.idFilm, existingFilm.supports)
@@ -134,6 +175,12 @@ class FilmService:
         return updated
 
     def deleteFilm(self, idFilm: str) -> None:
+        """
+        Méthode qui supprime un film.
+
+        :param idFilm: Identifiant du film.
+        :raises ClientError: Si l'appel API échoue.
+        """
         self._apiClient.delete(f"/films/{quote(idFilm, safe='')}")
 
     # ------------------------------------------------------------------ #
