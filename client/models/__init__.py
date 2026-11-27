@@ -9,3 +9,4 @@ from .SupportDTO import SupportDTO
 from .SupportTypeDTO import SupportTypeDTO
 from .LanguageDTO import LanguageDTO
 from .FilmDTO import FilmDTO
+from .LoanDTO import LoanDTO

@@ -52,12 +52,12 @@ def registerErrorHandlers(app: Flask) -> None:
     @app.errorhandler(ApiUnavailableError)
     def handleApiUnavailable(error: ApiUnavailableError):
         app.logger.error("API unavailable: %s", error)
-        return errorPage(503, "Le service de catalogue est momentanément indisponible.")
+        return errorPage(503, "Le service distant est momentanément indisponible.")
 
     @app.errorhandler(ApiError)
     def handleApiError(error: ApiError):
         app.logger.error("API error: %s", error)
-        return errorPage(502, "Réponse inattendue du service de catalogue.")
+        return errorPage(502, "Réponse inattendue du service distant.")
 
     @app.errorhandler(HTTPException)
     def handleHttpException(error: HTTPException):

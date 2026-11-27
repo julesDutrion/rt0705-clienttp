@@ -1,4 +1,5 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
+from urllib.parse import quote
 
 from models import SupportDTO
 
@@ -9,6 +10,14 @@ from exceptions import InvalidRequestError
 class SupportService:
     def __init__(self, apiClient: ApiClient) -> None:
         self._apiClient = apiClient
+
+    def getSupportById(self, idSupport: int) -> SupportDTO:
+        return SupportDTO.fromDict(self._apiClient.get(f"/supports/{idSupport}"))
+
+    def getSupportsByFilmId(self, idFilm: str) -> List[SupportDTO]:
+        encodedIdFilm = quote(idFilm, safe="")
+        data = self._apiClient.get(f"/supports/film/{encodedIdFilm}")
+        return [SupportDTO.fromDict(item) for item in data]
 
     def createSupport(self, support: SupportDTO) -> SupportDTO:
         return SupportDTO.fromDict(

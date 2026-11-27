@@ -15,3 +15,16 @@ administrateur peut lister les comptes, modifier le rôle d'un autre compte ou
 supprimer un compte depuis le panneau d'administration. L'inscription demande
 une confirmation du mot de passe; une modification de mot de passe vérifie
 également que les deux saisies correspondent.
+
+Les utilisateurs authentifiés peuvent consulter leurs emprunts et leur
+historique. Les gestionnaires et administrateurs disposent d'une page de gestion
+globale, d'une recherche ciblée par login (`GET /loans/user/<login>`) et peuvent
+confirmer le retour d'un support via `PATCH /loans/<idLoan>/return`. La recherche
+est effectuée par l'API; un utilisateur inexistant est distingué d'un compte
+existant sans emprunt.
+
+La fiche d'un film affiche la disponibilité de chaque support physique depuis
+les données de l'API et permet à un utilisateur connecté d'emprunter un support
+disponible. La date de retour est affichée quand elle est visible via les
+emprunts personnels ou la liste réservée aux gestionnaires et administrateurs;
+l'API ne révèle pas cette date pour le prêt d'un autre utilisateur standard.

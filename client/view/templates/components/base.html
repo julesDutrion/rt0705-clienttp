@@ -15,6 +15,13 @@
     <nav class="side-nav">
       <p class="side-nav-heading">Navigation</p>
       <a href="{{ url_for('films.getFilms') }}" class="{% if request.blueprint == 'films' %}active{% endif %}">Catalogue</a>
+      {% if currentUser %}
+        <p class="side-nav-heading">Emprunts</p>
+        <a href="{{ url_for('loans.myLoans') }}" class="{% if request.endpoint in ['loans.myLoans', 'loans.myLoanDetail'] %}active{% endif %}">Mes emprunts</a>
+        {% if canManageLoans %}
+          <a href="{{ url_for('loans.manageLoans') }}" class="{% if request.endpoint in ['loans.manageLoans', 'loans.managedLoanDetail', 'loans.returnLoan'] %}active{% endif %}">Gestion des emprunts</a>
+        {% endif %}
+      {% endif %}
       {% if canPublish %}
         <p class="side-nav-heading">Gestion du catalogue</p>
         <a href="{{ url_for('directors.getDirectors') }}" class="{% if request.blueprint == 'directors' %}active{% endif %}">Réalisateurs</a>

@@ -21,6 +21,7 @@ from controllers import (
     createActorBlueprint,
     createAccountBlueprint,
     createSupportTypeBlueprint,
+    createLoanBlueprint,
 )
 from ErrorHandlers import registerErrorHandlers
 from services import (
@@ -34,6 +35,7 @@ from services import (
     SupportService,
     SupportTypeService,
     UserService,
+    LoanService,
 )
 
 MANAGEMENT_PAGE_ENDPOINTS = {
@@ -43,6 +45,9 @@ MANAGEMENT_PAGE_ENDPOINTS = {
     "getGenres",
     "getLanguages",
     "getSupportTypes",
+    "manageLoans",
+    "managedLoanDetail",
+    "returnLoan",
 }
 
 
@@ -73,6 +78,9 @@ def createApp() -> Flask:
         supportService,
         supportTypeService,
     )
+    loanService = LoanService(
+        apiClient, supportService, filmService, userService
+    )
 
     # Contrôleurs
     app.register_blueprint(createFilmBlueprint(
@@ -83,6 +91,7 @@ def createApp() -> Flask:
         classificationService,
         actorService,
         supportTypeService,
+        loanService,
     ))
     app.register_blueprint(createActorBlueprint(actorService))
     app.register_blueprint(createDirectorBlueprint(directorService))
@@ -91,6 +100,7 @@ def createApp() -> Flask:
     app.register_blueprint(createClassificationBlueprint(classificationService))
     app.register_blueprint(createSupportTypeBlueprint(supportTypeService))
     app.register_blueprint(createAccountBlueprint(userService))
+    app.register_blueprint(createLoanBlueprint(loanService))
 
     @app.get("/")
     def index():
@@ -117,6 +127,7 @@ def createApp() -> Flask:
             "currentUser": user,
             "canPublish": role in {"manager", "adminstrateur"},
             "isAdmin": role == "adminstrateur",
+            "canManageLoans": role in {"manager", "adminstrateur"},
         }
 
     registerErrorHandlers(app)

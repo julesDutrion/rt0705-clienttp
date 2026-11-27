@@ -53,13 +53,39 @@
 <h2>Supports</h2>
 <div class="support-list">
   {% for support in film.supports %}
-    <article class="support-card">
-      <h3>{{ support.supportType.name if support.supportType else 'Type de support inconnu' }}</h3>
-      <p>Mode : {{ support.supportType.mode if support.supportType else 'inconnu' }}</p>
+    <article class="support-card{% if support.supportType and support.supportType.mode == 'physical' %} support-card--physical{% endif %}">
+      <div class="support-card-info">
+        <h3>{{ support.supportType.name if support.supportType else 'Type de support inconnu' }}</h3>
+        <p>Mode : {{ support.supportType.mode if support.supportType else 'inconnu' }}</p>
+        {% if support.supportType and support.supportType.mode == 'physical' %}
+          <p>Localisation : {{ support.location }}</p>
+        {% elif support.supportType and support.supportType.mode == 'digital' %}
+          <p><a href="{{ support.url }}" target="_blank" rel="noopener noreferrer">Ouvrir le contenu en streaming</a></p>
+        {% endif %}
+      </div>
       {% if support.supportType and support.supportType.mode == 'physical' %}
-        <p>Localisation : {{ support.location }}</p>
-      {% elif support.supportType and support.supportType.mode == 'digital' %}
-        <p><a href="{{ support.url }}" target="_blank" rel="noopener noreferrer">Ouvrir le contenu en streaming</a></p>
+        <div class="support-card-actions">
+          {% if support.isAvailable is sameas true %}
+            <p><span class="loan-status current">Disponible</span></p>
+            {% if currentUser %}
+              <form method="post" action="{{ url_for('loans.borrowSupport', idPhysicalSupport=support.idSupport, idFilm=film.idFilm) }}">
+                <button class="button primary" type="submit">Emprunter ce support</button>
+              </form>
+            {% else %}
+              <p><a href="{{ url_for('account.login') }}">Connectez-vous pour emprunter ce support.</a></p>
+            {% endif %}
+          {% elif support.isAvailable is sameas false %}
+            <p><span class="loan-status borrowed">Emprunté</span></p>
+            {% set currentLoan = userLoansBySupport.get(support.idSupport) %}
+            {% if currentLoan %}
+              <p>Retour prévu le {{ currentLoan.expectedReturnDate.strftime("%d/%m/%Y") }}.</p>
+            {% else %}
+              <p class="form-hint">Date de retour prévue non disponible.</p>
+            {% endif %}
+          {% else %}
+            <p class="form-hint">Disponibilité non communiquée.</p>
+          {% endif %}
+        </div>
       {% endif %}
     </article>
   {% endfor %}

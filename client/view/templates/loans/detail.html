@@ -1,0 +1,53 @@
+{% extends "components/base.html" %}
+{% block title %}Détail de l'emprunt #{{ loan.idLoan }}{% endblock %}
+{% block content %}
+<p>
+  {% if isManagement %}
+    <a class="back-link" href="{{ url_for('loans.manageLoans') }}">← Retour à la gestion des emprunts</a>
+  {% else %}
+    <a class="back-link" href="{{ url_for('loans.myLoans') }}">← Retour à mes emprunts</a>
+  {% endif %}
+</p>
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Emprunt #{{ loan.idLoan }}</p>
+    <h1>Détail de l'emprunt</h1>
+  </div>
+  {% if loan.isReturned %}
+    <span class="loan-status returned">Retourné</span>
+  {% elif loan.isOverdue %}
+    <span class="loan-status overdue">En retard</span>
+  {% else %}
+    <span class="loan-status current">En cours</span>
+  {% endif %}
+</div>
+
+<section class="loan-detail-card" aria-label="Informations sur l'emprunt">
+  <dl>
+    <dt>Utilisateur</dt><dd>{{ userLogin }}{% if isManagement %} (compte #{{ loan.idUser }}){% endif %}</dd>
+    <dt>Film</dt><dd>{{ film.title }}</dd>
+    <dt>Support physique</dt>
+    <dd>
+      {% if support.supportType %}
+        {{ support.supportType.name }}
+      {% elif loan.supportType %}
+        {{ loan.supportType.name }}
+      {% else %}
+        Support physique
+      {% endif %}
+    </dd>
+    {% if support.location %}<dt>Localisation</dt><dd>{{ support.location }}</dd>{% endif %}
+    <dt>Date de début</dt><dd><time datetime="{{ loan.startDate.isoformat() }}">{{ loan.startDate.strftime("%d/%m/%Y") }}</time></dd>
+    <dt>Retour prévu</dt><dd><time datetime="{{ loan.expectedReturnDate.isoformat() }}">{{ loan.expectedReturnDate.strftime("%d/%m/%Y") }}</time></dd>
+    {% if loan.actualReturnDate %}
+      <dt>Retour effectif</dt><dd><time datetime="{{ loan.actualReturnDate.isoformat() }}">{{ loan.actualReturnDate.strftime("%d/%m/%Y") }}</time></dd>
+    {% endif %}
+  </dl>
+</section>
+
+{% if canReturn %}
+  <form class="loan-return-form" method="post" action="{{ url_for('loans.returnLoan', idLoan=loan.idLoan) }}" onsubmit="return confirm('Confirmer le retour de ce support ?');">
+    <button class="button primary" type="submit">Déclarer le retour du support</button>
+  </form>
+{% endif %}
+{% endblock %}

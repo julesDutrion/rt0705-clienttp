@@ -69,7 +69,15 @@ class FilmService:
         return [FilmDTO.fromDict(item) for item in data]
 
     def getFilmById(self, idFilm: str) -> FilmDTO:
-        return FilmDTO.fromDict(self._apiClient.get(f"/films/{quote(idFilm, safe='')}"))
+        film = FilmDTO.fromDict(
+            self._apiClient.get(f"/films/{quote(idFilm, safe='')}")
+        )
+        film.supports = self._supportService.getSupportsByFilmId(film.idFilm)
+        return film
+
+    def getFilmTitleById(self, idFilm: str) -> str:
+        data = self._apiClient.get(f"/films/{quote(idFilm, safe='')}")
+        return FilmDTO.fromDict(data).title
 
     # ------------------------------------------------------------------ #
     # Écriture

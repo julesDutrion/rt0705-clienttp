@@ -1,0 +1,114 @@
+{% extends "components/base.html" %}
+{% block title %}Gestion des emprunts{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Espace gestionnaire</p>
+    <h1>Gestion des emprunts</h1>
+  </div>
+</div>
+
+<form class="loan-search" method="get" action="{{ url_for('loans.manageLoans') }}">
+  <label for="loan-login">Rechercher les emprunts d'un utilisateur par login</label>
+  <div class="loan-search-controls">
+    <input id="loan-login" type="search" name="login" value="{{ searchLogin }}" required autocomplete="off">
+    <button class="button primary" type="submit">Rechercher</button>
+    {% if searchPerformed %}
+      <a class="button ghost" href="{{ url_for('loans.manageLoans') }}">Réinitialiser</a>
+    {% endif %}
+  </div>
+</form>
+
+{% if userNotFound %}
+  <p class="loan-notice error" role="status">Aucun utilisateur ne correspond au login « {{ searchLogin }} ».</p>
+{% elif searchPerformed and not currentLoans and not pastLoans %}
+  <p class="loan-notice" role="status">Ce compte existe, mais aucun emprunt ne lui est associé.</p>
+{% elif searchPerformed and not currentLoans %}
+  <p class="loan-notice" role="status">Cet utilisateur n'a actuellement aucun emprunt en cours. Son historique est affiché ci-dessous.</p>
+{% endif %}
+
+<section class="loan-section" aria-labelledby="managed-current-heading">
+  <h2 id="managed-current-heading">Emprunts en cours{% if searchPerformed and not userNotFound %} — {{ searchLogin }}{% endif %}</h2>
+  {% if currentLoans %}
+    <div class="table-shell">
+      <table class="data-table loan-table">
+        <thead>
+          <tr>
+            <th>Film</th>
+            <th>Utilisateur</th>
+            <th>Début</th>
+            <th>Retour prévu</th>
+            <th>État</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for loan in currentLoans %}
+            <tr>
+              <td>
+                {{ filmTitles[loan.idLoan] }}
+                {% if loan.supportType %}<span class="loan-secondary">{{ loan.supportType.name }}</span>{% endif %}
+              </td>
+              <td>{% if searchPerformed %}{{ searchLogin }}{% elif userLogins.get(loan.idUser) %}{{ userLogins.get(loan.idUser) }}{% else %}Compte #{{ loan.idUser }} (introuvable){% endif %}</td>
+              <td><time datetime="{{ loan.startDate.isoformat() }}">{{ loan.startDate.strftime("%d/%m/%Y") }}</time></td>
+              <td><time datetime="{{ loan.expectedReturnDate.isoformat() }}">{{ loan.expectedReturnDate.strftime("%d/%m/%Y") }}</time></td>
+              <td>
+                {% if loan.isOverdue %}
+                  <span class="loan-status overdue">En retard</span>
+                {% else %}
+                  <span class="loan-status current">En cours</span>
+                {% endif %}
+              </td>
+              <td class="loan-actions">
+                <a href="{{ url_for('loans.managedLoanDetail', idLoan=loan.idLoan) }}">Détail</a>
+                <form method="post" action="{{ url_for('loans.returnLoan', idLoan=loan.idLoan) }}" onsubmit="return confirm('Confirmer le retour de ce support ?');">
+                  <button class="danger-link" type="submit">Déclarer le retour</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif not userNotFound and not (searchPerformed and pastLoans) %}
+    <p class="loan-empty">{% if searchPerformed %}Aucun emprunt en cours pour ce compte.{% else %}Aucun emprunt en cours.{% endif %}</p>
+  {% endif %}
+</section>
+
+<section class="loan-section" aria-labelledby="managed-past-heading">
+  <h2 id="managed-past-heading">Historique des emprunts{% if searchPerformed and not userNotFound %} — {{ searchLogin }}{% endif %}</h2>
+  {% if pastLoans %}
+    <div class="table-shell">
+      <table class="data-table loan-table">
+        <thead>
+          <tr>
+            <th>Film</th>
+            <th>Utilisateur</th>
+            <th>Début</th>
+            <th>Retour prévu</th>
+            <th>Retour effectif</th>
+            <th>Détail</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for loan in pastLoans %}
+            <tr>
+              <td>
+                {{ filmTitles[loan.idLoan] }}
+                {% if loan.supportType %}<span class="loan-secondary">{{ loan.supportType.name }}</span>{% endif %}
+              </td>
+              <td>{% if searchPerformed %}{{ searchLogin }}{% elif userLogins.get(loan.idUser) %}{{ userLogins.get(loan.idUser) }}{% else %}Compte #{{ loan.idUser }} (introuvable){% endif %}</td>
+              <td><time datetime="{{ loan.startDate.isoformat() }}">{{ loan.startDate.strftime("%d/%m/%Y") }}</time></td>
+              <td><time datetime="{{ loan.expectedReturnDate.isoformat() }}">{{ loan.expectedReturnDate.strftime("%d/%m/%Y") }}</time></td>
+              <td><time datetime="{{ loan.actualReturnDate.isoformat() }}">{{ loan.actualReturnDate.strftime("%d/%m/%Y") }}</time></td>
+              <td><a href="{{ url_for('loans.managedLoanDetail', idLoan=loan.idLoan) }}">Consulter</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% elif not userNotFound %}
+    <p class="loan-empty">{% if searchPerformed %}Aucun emprunt passé pour ce compte.{% else %}Aucun emprunt passé.{% endif %}</p>
+  {% endif %}
+</section>
+{% endblock %}

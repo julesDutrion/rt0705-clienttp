@@ -57,6 +57,14 @@ class ApiClient:
     ) -> Any:
         return self._request("PUT", path, body=body, accessToken=accessToken)
 
+    def patch(
+        self,
+        path: str,
+        body: Optional[Dict[str, Any]] = None,
+        accessToken: Optional[str] = None,
+    ) -> Any:
+        return self._request("PATCH", path, body=body, accessToken=accessToken)
+
     def delete(self, path: str, accessToken: Optional[str] = None) -> Any:
         return self._request("DELETE", path, accessToken=accessToken)
 

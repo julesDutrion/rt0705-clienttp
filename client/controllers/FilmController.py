@@ -1,6 +1,14 @@
 from typing import Any, Dict, List, Optional
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    flash,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from werkzeug.datastructures import MultiDict
 
 from exceptions import USER_INPUT_ERRORS
@@ -11,6 +19,7 @@ from services import (
     FilmService,
     GenreService,
     LanguageService,
+    LoanService,
     SupportTypeService,
 )
 
@@ -92,6 +101,7 @@ def createFilmBlueprint(
     classificationService: ClassificationService,
     actorService: ActorService,
     supportTypeService: SupportTypeService,
+    loanService: LoanService,
 ) -> Blueprint:
     blueprint = Blueprint("films", __name__, url_prefix="/films")
 
@@ -147,7 +157,22 @@ def createFilmBlueprint(
     @blueprint.get("/<string:idFilm>")
     def getFilm(idFilm: str):
         film = filmService.getFilmById(idFilm)
-        return render_template("films/detail.html", film=film)
+        userLoansBySupport = {}
+        if session.get("accessToken") and any(
+            support.isAvailable is False for support in film.supports
+        ):
+            if session.get("user", {}).get("role") in {
+                "manager",
+                "adminstrateur",
+            }:
+                userLoansBySupport = loanService.getAllActiveLoansBySupport()
+            else:
+                userLoansBySupport = loanService.getMyActiveLoansBySupport()
+        return render_template(
+            "films/detail.html",
+            film=film,
+            userLoansBySupport=userLoansBySupport,
+        )
 
     @blueprint.route("/new", methods=["GET", "POST"])
     def newFilm():

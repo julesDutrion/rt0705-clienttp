@@ -20,6 +20,7 @@ class SupportDTO(BaseDTO):
     location: Optional[str] = None
     url: Optional[str] = None
     supportType: Optional[SupportTypeDTO] = None
+    isAvailable: Optional[bool] = None
 
     @classmethod
     def fromDict(cls, data: Dict[str, Any]) -> "SupportDTO":
@@ -34,4 +35,5 @@ class SupportDTO(BaseDTO):
                 if data.get("supportType")
                 else None
             ),
+            isAvailable=data.get("isAvailable"),
         )

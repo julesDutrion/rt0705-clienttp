@@ -1,0 +1,86 @@
+{% extends "components/base.html" %}
+{% block title %}Mes emprunts{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Mon compte</p>
+    <h1>Mes emprunts</h1>
+  </div>
+</div>
+
+<section class="loan-section" aria-labelledby="current-loans-heading">
+  <h2 id="current-loans-heading">Emprunts en cours</h2>
+  {% if currentLoans %}
+    <div class="table-shell">
+      <table class="data-table loan-table">
+        <thead>
+          <tr>
+            <th>Film</th>
+            <th>Début</th>
+            <th>Retour prévu</th>
+            <th>État</th>
+            <th>Détail</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for loan in currentLoans %}
+            <tr>
+              <td>
+                {{ filmTitles[loan.idLoan] }}
+                {% if loan.supportType %}<span class="loan-secondary">{{ loan.supportType.name }}</span>{% endif %}
+              </td>
+              <td><time datetime="{{ loan.startDate.isoformat() }}">{{ loan.startDate.strftime("%d/%m/%Y") }}</time></td>
+              <td><time datetime="{{ loan.expectedReturnDate.isoformat() }}">{{ loan.expectedReturnDate.strftime("%d/%m/%Y") }}</time></td>
+              <td>
+                {% if loan.isOverdue %}
+                  <span class="loan-status overdue">En retard</span>
+                {% else %}
+                  <span class="loan-status current">En cours</span>
+                {% endif %}
+              </td>
+              <td><a href="{{ url_for('loans.myLoanDetail', idLoan=loan.idLoan) }}">Consulter</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="loan-empty">Vous n'avez actuellement aucun support emprunté.</p>
+  {% endif %}
+</section>
+
+<section class="loan-section" aria-labelledby="past-loans-heading">
+  <h2 id="past-loans-heading">Historique des emprunts</h2>
+  {% if pastLoans %}
+    <div class="table-shell">
+      <table class="data-table loan-table">
+        <thead>
+          <tr>
+            <th>Film</th>
+            <th>Début</th>
+            <th>Retour prévu</th>
+            <th>Retour effectif</th>
+            <th>Détail</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for loan in pastLoans %}
+            <tr>
+              <td>
+                {{ filmTitles[loan.idLoan] }}
+                {% if loan.supportType %}<span class="loan-secondary">{{ loan.supportType.name }}</span>{% endif %}
+              </td>
+              <td><time datetime="{{ loan.startDate.isoformat() }}">{{ loan.startDate.strftime("%d/%m/%Y") }}</time></td>
+              <td><time datetime="{{ loan.expectedReturnDate.isoformat() }}">{{ loan.expectedReturnDate.strftime("%d/%m/%Y") }}</time></td>
+              <td><time datetime="{{ loan.actualReturnDate.isoformat() }}">{{ loan.actualReturnDate.strftime("%d/%m/%Y") }}</time></td>
+              <td><a href="{{ url_for('loans.myLoanDetail', idLoan=loan.idLoan) }}">Consulter</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="loan-empty">Aucun emprunt terminé pour le moment.</p>
+  {% endif %}
+</section>
+{% endblock %}
